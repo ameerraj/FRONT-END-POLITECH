@@ -1,0 +1,12 @@
+** Use this to direct your LLM to build the dashboard
+
+What data it collects
+It pulls several types of parliamentary activity straight from TBMM's website:
+
+Law proposals (kanun teklifleri)
+Votes / roll calls (oylamalar)
+Written questions to ministers (yazılı sorular)
+General debate motions and research motions/commissions (araştırma önergeleri/komisyonları)
+Floor speeches from the official transcripts (genel kurul konuşmaları)
+
+**
