@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Parliament Analytics — Legislative Activity Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c111c;
+    --bg-2:#0f1626;
+    --panel:#131c2e;
+    --panel-2:#172134;
+    --line:#243149;
+    --line-soft:#1c2740;
+    --txt:#e8edf6;
+    --txt-dim:#9aa7bd;
+    --txt-mute:#6b7791;
+    --accent:#5b8cff;
+    --good:#34d399;
+    --warn:#fbbf24;
+    --pill:#1b2740;
+    --ring-track:#1f2c45;
+    /* card accent ramp, mirrors the source order */
+    --c1:#7c83ff; --c2:#ff5f8a; --c3:#22b8d6; --c4:#34d399;
+    --c5:#37a3ff; --c6:#a06bff; --c7:#ff7a45;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 70% -10%, rgba(91,140,255,.08), transparent 60%),
+      var(--bg);
+    color:var(--txt);
+    font-family:"Inter",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+  /* ---------------- Sidebar ---------------- */
+  aside{
+    background:linear-gradient(180deg,var(--bg-2),var(--bg));
+    border-right:1px solid var(--line-soft);
+    padding:18px 18px 40px;
+    position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  }
+  aside::-webkit-scrollbar{width:8px}
+  aside::-webkit-scrollbar-thumb{background:#1f2a40;border-radius:8px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+  .brand .mark{
+    width:30px;height:30px;border-radius:8px;flex:none;
+    background:conic-gradient(from 210deg,var(--c1),var(--c2),var(--c3),var(--c4),var(--c1));
+    box-shadow:0 0 18px rgba(124,131,255,.45);
+  }
+  .brand .name{font-family:"Plus Jakarta Sans";font-weight:800;font-size:15px;letter-spacing:.2px}
+  .brand .sub{font-size:10.5px;color:var(--txt-mute);margin-top:1px}
+  .group{margin:22px 0 6px}
+  .group-title{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--txt-mute);font-weight:600;margin-bottom:10px;
+  }
+  .seg{display:flex;background:var(--pill);border-radius:10px;padding:3px;gap:3px}
+  .seg button{
+    flex:1;border:0;background:transparent;color:var(--txt-dim);
+    font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 6px;border-radius:8px;cursor:pointer;
+    transition:.18s;
+  }
+  .seg button.on{background:linear-gradient(180deg,#2a3a5c,#22304d);color:#fff;box-shadow:var(--shadow)}
+  select{
+    width:100%;background:var(--panel);color:var(--txt);border:1px solid var(--line);
+    border-radius:10px;padding:11px 12px;font-family:inherit;font-size:13.5px;font-weight:600;
+    appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%239aa7bd' stroke-width='2'><path d='M3 5l4 4 4-4'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;
+  }
+  .radio{
+    display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;
+    color:var(--txt-dim);font-size:13px;font-weight:500;transition:.15s;
+  }
+  .radio:hover{background:var(--line-soft);color:var(--txt)}
+  .radio.on{color:#fff}
+  .dot{
+    width:15px;height:15px;border-radius:50%;border:2px solid #3a496a;flex:none;position:relative;transition:.15s
+  }
+  .radio.on .dot{border-color:var(--accent)}
+  .radio.on .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .pickerwrap{margin-top:10px;display:none}
+  .pickerwrap.show{display:block}
+  /* ---------------- Main ---------------- */
+  main{padding:22px 28px 60px;max-width:1500px}
+  .notice{
+    background:linear-gradient(90deg,rgba(52,211,153,.12),rgba(52,211,153,.04));
+    border:1px solid rgba(52,211,153,.25);color:#bdf3dc;
+    padding:13px 16px;border-radius:12px;font-size:13px;margin-bottom:22px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .notice b{color:#eafff5}
+  h1.title{font-family:"Plus Jakarta Sans";font-size:21px;font-weight:800;margin:0;display:flex;align-items:center;gap:9px}
+  h1.title .tick{color:var(--accent)}
+  .subline{color:var(--txt-dim);font-size:13px;margin:6px 0 0}
+  .subline b{color:var(--txt)}
+  .scope-chip{
+    display:inline-flex;align-items:center;gap:7px;margin-left:8px;vertical-align:middle;
+    background:var(--pill);border:1px solid var(--line);border-radius:999px;
+    padding:4px 11px;font-size:11.5px;font-weight:600;color:#cdd8ee;
+  }
+  /* cards */
+  .cards{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin:24px 0 8px;
+  }
+  @media(max-width:1280px){.cards{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:820px){.cards{grid-template-columns:repeat(2,1fr)}}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--bg-2));
+    border:1px solid var(--line-soft);border-radius:16px;padding:16px 12px 18px;
+    text-align:center;position:relative;cursor:pointer;transition:.2s;overflow:hidden;
+  }
+  .card:hover{transform:translateY(-2px);border-color:var(--line)}
+  .card.focus{border-color:var(--cc);box-shadow:0 0 0 1px var(--cc),0 12px 30px rgba(0,0,0,.4)}
+  .card .ico{height:26px;color:var(--cc);margin-bottom:8px}
+  .card .label{font-size:12px;font-weight:600;color:var(--txt-dim);min-height:30px;display:flex;align-items:center;justify-content:center;line-height:1.25}
+  .donut{margin:8px auto 10px;width:104px;height:104px;position:relative}
+  .donut .num{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .donut .num .v{font-family:"Plus Jakarta Sans";font-weight:800;font-size:21px;line-height:1}
+  .donut .num .u{font-size:10px;color:var(--txt-mute);margin-top:2px;letter-spacing:.04em}
+  .card .cat{font-weight:700;font-size:12.5px;margin-top:2px;color:#fff}
+  .card .catsub{font-size:10.5px;color:var(--txt-mute);margin-top:1px}
+  /* section */
+  .section{margin-top:30px}
+  .section h2{font-family:"Plus Jakarta Sans";font-size:16px;font-weight:700;display:flex;align-items:center;gap:9px;margin:0}
+  .section h2 .ic{color:var(--accent)}
+  .section .desc{color:var(--txt-mute);font-size:12.5px;margin:5px 0 14px}
+  .treewrap{display:grid;grid-template-columns:1fr 54px;gap:14px;align-items:stretch}
+  #treemap{
+    position:relative;width:100%;height:330px;border:1px solid var(--line-soft);border-radius:14px;overflow:hidden;background:var(--bg-2)
+  }
+  .tile{
+    position:absolute;border:1px solid rgba(8,12,22,.65);padding:8px 9px;overflow:hidden;cursor:pointer;
+    transition:filter .15s, outline .15s;color:#eaf1ff;
+  }
+  .tile:hover{filter:brightness(1.14)}
+  .tile.sel{outline:2px solid #fff;outline-offset:-2px;z-index:2}
+  .tile .tn{font-size:11px;font-weight:700;line-height:1.18}
+  .tile .tv{font-size:11px;font-weight:700;opacity:.85;margin-top:3px;font-family:"Plus Jakarta Sans"}
+  .tile.small .tn{font-size:9.5px}
+  .tile.tiny .tv{display:none}
+  .legend{display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:var(--txt-mute);padding:2px 0}
+  .legend .bar{flex:1;width:14px;border-radius:6px;margin:6px auto;background:linear-gradient(180deg,#1e3a8a,#3b82f6,#93c5fd,#1f2c45)}
+  .legend .cap{text-align:center}
+  /* leaderboard */
+  #board{display:none}
+  #board.show{display:block}
+  .lbcard{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line-soft);border-radius:16px;padding:6px 6px 10px}
+  .lbrow{
+    display:grid;grid-template-columns:42px 1fr 92px;align-items:center;gap:14px;
+    padding:12px 16px;border-bottom:1px solid var(--line-soft);
+  }
+  .lbrow:last-child{border-bottom:0}
+  .lbrow .rk{font-family:"Plus Jakarta Sans";font-weight:800;font-size:15px;color:var(--txt-mute);text-align:center}
+  .lbrow.top1 .rk{color:var(--c4)}.lbrow.top2 .rk{color:#cbd5e1}.lbrow.top3 .rk{color:var(--c7)}
+  .lbrow .nm{font-weight:600;font-size:13.5px}
+  .lbrow .nm .meta{color:var(--txt-mute);font-size:11.5px;font-weight:500;margin-top:2px}
+  .lbrow .track{height:8px;background:var(--ring-track);border-radius:6px;margin-top:8px;overflow:hidden}
+  .lbrow .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--c5),var(--c1))}
+  .lbrow .val{text-align:right;font-family:"Plus Jakarta Sans";font-weight:800;font-size:16px}
+  .lbrow .val small{display:block;font-family:"Inter";font-weight:500;font-size:10.5px;color:var(--txt-mute)}
+  .hide{display:none!important}
+  .cards.dim .card:not(.focus){opacity:.5}
+  footer{margin-top:34px;color:var(--txt-mute);font-size:11px;border-top:1px solid var(--line-soft);padding-top:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ================= SIDEBAR ================= -->
+  <aside>
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <div class="name">Parliament Analytics</div>
+        <div class="sub">Legislative activity, made measurable</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">View</div>
+      <div class="seg" id="viewSeg">
+        <button data-view="analysis" class="on">Analysis</button>
+        <button data-view="leaderboard">Leaderboard</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Legislative Year</div>
+      <select id="yearSel">
+        <option value="28/4">Term 28 · Year 4</option>
+        <option value="28/3">Term 28 · Year 3</option>
+        <option value="28/2">Term 28 · Year 2</option>
+        <option value="28/1">Term 28 · Year 1</option>
+        <option value="27/5">Term 27 · Year 5</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Analysis Level</div>
+      <div id="levelList">
+        <div class="radio on" data-level="year"><span class="dot"></span>Legislative Year</div>
+        <div class="radio" data-level="party"><span class="dot"></span>Party</div>
+        <div class="radio" data-level="mp"><span class="dot"></span>Member (MP)</div>
+      </div>
+      <div class="pickerwrap" id="pickerWrap">
+        <select id="targetSel"></select>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Legislative Activity</div>
+      <div id="actList">
+        <div class="radio on" data-act="all"><span class="dot"></span>Overview (all)</div>
+        <div class="radio" data-act="law"><span class="dot"></span>Law Proposals</div>
+        <div class="radio" data-act="wq"><span class="dot"></span>Written Questions</div>
+        <div class="radio" data-act="debate"><span class="dot"></span>General Debate Motions</div>
+        <div class="radio" data-act="inquiry"><span class="dot"></span>Inquiry Motions</div>
+        <div class="radio" data-act="vote"><span class="dot"></span>Votes</div>
+        <div class="radio" data-act="floor"><span class="dot"></span>Floor Speeches</div>
+        <div class="radio" data-act="committee"><span class="dot"></span>Committee Speeches</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Topic Category</div>
+      <select id="catSel"></select>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main>
+    <div class="notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span>Pick a <b>topic category</b> and the document count updates automatically across every activity. Click any card or treemap tile to drill in.</span>
+    </div>
+
+    <h1 class="title"><span class="tick">📈</span> <span id="titleText"></span></h1>
+    <p class="subline">Total members: <b id="totalMP">592</b><span class="scope-chip" id="scopeChip">All members</span></p>
+
+    <!-- analysis: cards -->
+    <div id="analysis">
+      <div class="cards" id="cards"></div>
+
+      <div class="section">
+        <h2><span class="ic">▦</span> Topic distribution across all activities</h2>
+        <p class="desc">Combined share of law proposals, written questions, inquiry &amp; debate motions, floor and committee speeches by category. Tile size = document volume.</p>
+        <div class="treewrap">
+          <div id="treemap"></div>
+          <div class="legend">
+            <div class="cap">High</div>
+            <div class="bar"></div>
+            <div class="cap">Low</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- leaderboard -->
+    <div id="board">
+      <div class="section" style="margin-top:8px">
+        <h2><span class="ic">🏆</span> <span id="boardTitle"></span></h2>
+        <p class="desc" id="boardDesc"></p>
+        <div class="lbcard" id="lbcard"></div>
+      </div>
+    </div>
+
+    <footer>
+      English UI mockup of a TBMM legislative-analytics dashboard. Figures shown are illustrative sample data for demonstrating the interface — not official parliamentary records.
+    </footer>
+  </main>
+</div>
+
+<script>
+/* ===================== DATA MODEL (illustrative sample) ===================== */
+const ACTS = [
+  {id:'law',       label:'Law Proposals',          cardLabel:'Law Proposal',          w:0.17, cvar:'--c1', icon:'doc'},
+  {id:'wq',        label:'Written Questions',       cardLabel:'Written Question',      w:0.33, cvar:'--c2', icon:'q'},
+  {id:'inquiry',   label:'Inquiry Motions',         cardLabel:'Inquiry Motion',        w:0.09, cvar:'--c3', icon:'search'},
+  {id:'debate',    label:'General Debate Motions',  cardLabel:'Debate Motion',         w:0.05, cvar:'--c4', icon:'chat'},
+  {id:'floor',     label:'Floor Speeches',          cardLabel:'Floor Speech',          w:0.19, cvar:'--c5', icon:'mic'},
+  {id:'committee', label:'Committee Speeches',      cardLabel:'Committee Speech',      w:0.12, cvar:'--c6', icon:'people'},
+  {id:'vote',      label:'Votes',                   cardLabel:'Vote Participation',    w:0.05, cvar:'--c7', icon:'check'},
+];
+
+const CATS = [
+  {id:'const',     name:'Constitutional Order & Parliamentary Process', total:3176},
+  {id:'justice',   name:'Justice & Law',                                total:2147},
+  {id:'local',     name:'Local Government & Municipalities',            total:1534},
+  {id:'health',    name:'Health & Social Care',                         total:1120},
+  {id:'macro',     name:'Macroeconomy',                                 total:951},
+  {id:'labor',     name:'Labor & Employment',                           total:826},
+  {id:'urban',     name:'Urbanization & Zoning',                        total:750},
+  {id:'edu',       name:'Education & Science',                          total:749},
+  {id:'defense',   name:'Defense & Security',                           total:690},
+  {id:'transport', name:'Transport & Infrastructure',                   total:618},
+  {id:'agri',      name:'Agriculture & Forestry',                       total:540},
+  {id:'env',       name:'Environment & Climate',                        total:512},
+  {id:'foreign',   name:'Foreign Affairs',                              total:430},
+  {id:'energy',    name:'Energy & Natural Resources',                   total:401},
+];
+
+const YEAR_FACTOR = {'28/4':1, '28/3':0.86, '28/2':0.71, '28/1':0.58, '27/5':0.93};
+
+const PARTIES = [
+  {id:'p1', name:'Governing Group',        seats:268, share:0.452},
+  {id:'p2', name:'Main Opposition',        seats:169, share:0.286},
+  {id:'p3', name:'Centre-Right Bloc',      seats:57,  share:0.096},
+  {id:'p4', name:'Regional Party',         seats:48,  share:0.081},
+  {id:'p5', name:'Nationalist Group',      seats:43,  share:0.073},
+  {id:'p6', name:'Independents',           seats:7,   share:0.012},
+];
+
+// deterministic fake MPs
+const FIRST=['Aylin','Mert','Selin','Kerem','Deniz','Ece','Burak','Naz','Tolga','Pelin','Onur','Sıla','Emre','Buse','Cem','Lale','Kaan','Derya','Arda','Esra','Murat','Gül','Barış','İrem','Hakan','Yasemin','Efe','Zeynep','Ozan','Melis'];
+const LAST=['Yılmaz','Demir','Kaya','Şahin','Çelik','Aydın','Öztürk','Arslan','Doğan','Kılıç','Acar','Polat','Korkmaz','Aksoy','Erdem','Taş','Bulut','Güneş','Yıldız','Koç','Aslan','Çetin','Kurt','Şen','Ateş','Bozkurt','Tekin','Avcı','Uçar','Karaca'];
+function seededRand(s){let x=Math.sin(s)*10000;return x-Math.floor(x);}
+const MPS=[];
+for(let i=0;i<60;i++){
+  const f=FIRST[Math.floor(seededRand(i*7+1)*FIRST.length)];
+  const l=LAST[Math.floor(seededRand(i*13+5)*LAST.length)];
+  const p=PARTIES[Math.floor(seededRand(i*3+2)*5)];
+  MPS.push({id:'mp'+i, name:f+' '+l, party:p.name, weight:0.4+seededRand(i*17+9)*1.6});
+}
+
+/* ===================== STATE ===================== */
+const state={view:'analysis', year:'28/4', level:'year', target:'', act:'all', cat:'edu'};
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s);
+const byId=i=>document.getElementById(i);
+function fmt(n){return n.toLocaleString('en-US');}
+function jitter(seed){return 0.82+seededRand(seed)*0.36;} // 0.82–1.18
+
+// counts for a given category id + activity, under current scope
+function levelScale(){
+  if(state.level==='party'){const p=PARTIES.find(x=>x.id===state.target)||PARTIES[0];return p.share;}
+  if(state.level==='mp'){const m=MPS.find(x=>x.id===state.target)||MPS[0];return m.weight/592;}
+  return 1; // whole legislative year
+}
+function catActivityCount(catId, actId){
+  const cat=CATS.find(c=>c.id===catId); const act=ACTS.find(a=>a.id===actId);
+  const base=cat.total*act.w*jitter(cat.id.length*31+act.id.length*7+catId.charCodeAt(0)+actId.charCodeAt(1||0));
+  return Math.max(0, Math.round(base*YEAR_FACTOR[state.year]*levelScale()));
+}
+// total of an activity across all categories (for ring proportion)
+function activityTotal(actId){
+  return CATS.reduce((s,c)=>s+catActivityCount(c.id,actId),0);
+}
+
+/* ===================== ICONS ===================== */
+const ICONS={
+  doc:'<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v4h4"/>',
+  q:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>',
+  chat:'<path d="M4 5h16v11H8l-4 4z"/>',
+  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/>',
+  people:'<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c0-3 3-5 6-5s6 2 6 5M14 15c3 0 6 2 6 5"/>',
+  check:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/>',
+};
+
+/* ===================== RENDER: CARDS ===================== */
+function renderCards(){
+  const cat=CATS.find(c=>c.id===state.cat);
+  const wrap=byId('cards');
+  wrap.innerHTML='';
+  wrap.classList.toggle('dim', state.act!=='all');
+  ACTS.forEach(a=>{
+    const count=catActivityCount(state.cat,a.id);
+    const tot=activityTotal(a.id);
+    const pct=tot? count/tot : 0;
+    const R=44, C=2*Math.PI*R, off=C*(1-pct);
+    const focus=(state.act===a.id);
+    const el=document.createElement('div');
+    el.className='card'+(focus?' focus':'');
+    el.style.setProperty('--cc',`var(${a.cvar})`);
+    el.dataset.act=a.id;
+    el.innerHTML=`
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[a.icon]}</svg>
+      <div class="label">${a.cardLabel}</div>
+      <div class="donut">
+        <svg viewBox="0 0 104 104">
+          <circle cx="52" cy="52" r="${R}" fill="none" stroke="var(--ring-track)" stroke-width="9"/>
+          <circle cx="52" cy="52" r="${R}" fill="none" stroke="var(${a.cvar})" stroke-width="9"
+            stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"
+            transform="rotate(-90 52 52)" style="transition:stroke-dashoffset .6s ease"/>
+        </svg>
+        <div class="num"><span class="v">${fmt(count)}</span><span class="u">docs</span></div>
+      </div>
+      <div class="cat">${cat.name.length>26?cat.name.slice(0,24)+'…':cat.name}</div>
+      <div class="catsub">${(pct*100).toFixed(1)}% of all ${a.label.toLowerCase()}</div>
+    `;
+    el.title=cat.name;
+    el.addEventListener('click',()=>{ setAct(focus?'all':a.id); });
+    wrap.appendChild(el);
+  });
+}
+
+/* ===================== RENDER: TREEMAP ===================== */
+function colorFor(v,max){
+  // blue ramp by value
+  const t=Math.pow(v/max,0.7);
+  const stops=[[30,58,138],[37,99,235],[59,130,246],[96,165,250]];
+  const i=Math.min(stops.length-2, Math.floor((1-t)*(stops.length-1)));
+  const f=((1-t)*(stops.length-1))-i;
+  const a=stops[i], b=stops[i+1];
+  const ch=k=>Math.round(a[k]+(b[k]-a[k])*f);
+  return `rgb(${ch(0)},${ch(1)},${ch(2)})`;
+}
+// simple slice-and-dice treemap -> rectangles
+function squarify(items,x,y,w,h,out){
+  if(items.length===1){out.push({...items[0],x,y,w,h});return;}
+  const tot=items.reduce((s,i)=>s+i.value,0);
+  let acc=0,split=0;
+  for(let i=0;i<items.length;i++){acc+=items[i].value;split=i+1;if(acc>=tot/2)break;}
+  const a=items.slice(0,split), b=items.slice(split);
+  const aSum=a.reduce((s,i)=>s+i.value,0), frac=aSum/tot;
+  if(w>=h){
+    const wa=w*frac;
+    squarify(a,x,y,wa,h,out); squarify(b,x+wa,y,w-wa,h,out);
+  }else{
+    const ha=h*frac;
+    squarify(a,x,y,w,ha,out); squarify(b,x,y+ha,w,h-ha,out);
+  }
+}
+function renderTreemap(){
+  const tm=byId('treemap'); tm.innerHTML='';
+  const W=tm.clientWidth||900, H=tm.clientHeight||330;
+  const items=CATS.map(c=>{
+    let v=0; ACTS.forEach(a=>v+=catActivityCount(c.id,a.id));
+    return {id:c.id,name:c.name,value:Math.max(1,v)};
+  }).sort((a,b)=>b.value-a.value);
+  const max=items[0].value;
+  const out=[]; squarify(items,0,0,W,H,out);
+  out.forEach(r=>{
+    const el=document.createElement('div');
+    el.className='tile'+(r.id===state.cat?' sel':'')+(r.w<120?' small':'')+(r.h<46?' tiny':'');
+    el.style.cssText=`left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;background:${colorFor(r.value,max)}`;
+    el.innerHTML=`<div class="tn">${r.name}</div><div class="tv">${fmt(r.value)}</div>`;
+    el.title=`${r.name} — ${fmt(r.value)} documents`;
+    el.addEventListener('click',()=>{ state.cat=r.id; byId('catSel').value=r.id; renderAll(); });
+    tm.appendChild(el);
+  });
+}
+
+/* ===================== RENDER: LEADERBOARD ===================== */
+function renderBoard(){
+  const actId=state.act==='all'?'wq':state.act;
+  const act=ACTS.find(a=>a.id===actId);
+  const isParty=state.level!=='mp';
+  byId('boardTitle').textContent=`${isParty?'Party':'Member'} leaderboard — ${act.label}`;
+  byId('boardDesc').textContent=`Ranked by ${act.label.toLowerCase()} in ${state.cat==='all'?'all topics':CATS.find(c=>c.id===state.cat).name}, ${labelYear(state.year)}. ${state.act==='all'?'(Overview defaults to Written Questions — pick an activity to re-rank.)':''}`;
+
+  let rows;
+  if(isParty){
+    rows=PARTIES.map(p=>{
+      const v=Math.round(catActivityCount(state.cat,actId)*p.share*PARTIES.length*0.9*jitter(p.id.charCodeAt(1)));
+      return {name:p.name, meta:`${p.seats} seats`, val:v};
+    });
+  }else{
+    rows=MPS.slice(0,12).map(m=>{
+      const v=Math.round(catActivityCount(state.cat,actId)*(m.weight/592)*60*jitter(m.id.length+m.name.length));
+      return {name:m.name, meta:m.party, val:v};
+    });
+  }
+  rows.sort((a,b)=>b.val-a.val);
+  const max=Math.max(...rows.map(r=>r.val),1);
+  const card=byId('lbcard'); card.innerHTML='';
+  rows.forEach((r,i)=>{
+    const row=document.createElement('div');
+    row.className='lbrow'+(i<3?' top'+(i+1):'');
+    row.innerHTML=`
+      <div class="rk">${i+1}</div>
+      <div class="nm">${r.name}<div class="meta">${r.meta}</div>
+        <div class="track"><div class="fill" style="width:${(r.val/max*100).toFixed(1)}%"></div></div>
+      </div>
+      <div class="val">${fmt(r.val)}<small>documents</small></div>`;
+    card.appendChild(row);
+  });
+}
+
+/* ===================== HEADER + SCOPE ===================== */
+function labelYear(y){const[t,yr]=y.split('/');return `Term ${t} · Year ${yr}`;}
+function renderHeader(){
+  byId('titleText').textContent=`${labelYear(state.year)} — Legislative Activity Summary`;
+  let scope='All members';
+  if(state.level==='party'){scope=(PARTIES.find(p=>p.id===state.target)||PARTIES[0]).name;}
+  if(state.level==='mp'){const m=MPS.find(x=>x.id===state.target)||MPS[0];scope=m.name;}
+  byId('scopeChip').textContent=scope;
+  byId('totalMP').textContent= state.level==='mp' ? '1' :
+    state.level==='party' ? (PARTIES.find(p=>p.id===state.target)||PARTIES[0]).seats : '592';
+}
+
+/* ===================== ORCHESTRATION ===================== */
+function renderAll(){
+  renderHeader();
+  if(state.view==='analysis'){
+    byId('analysis').classList.remove('hide');
+    byId('board').classList.remove('show');
+    renderCards(); renderTreemap();
+  }else{
+    byId('analysis').classList.add('hide');
+    byId('board').classList.add('show');
+    renderBoard();
+  }
+}
+function setAct(id){
+  state.act=id;
+  byId('actList').querySelectorAll('.radio').forEach(r=>r.classList.toggle('on',r.dataset.act===id));
+  renderAll();
+}
+
+/* ===================== POPULATE CONTROLS ===================== */
+(function init(){
+  // category select
+  const cs=byId('catSel');
+  CATS.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;cs.appendChild(o);});
+  cs.value=state.cat;
+  cs.addEventListener('change',e=>{state.cat=e.target.value;renderAll();});
+
+  // view
+  byId('viewSeg').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b)return;
+    state.view=b.dataset.view;
+    byId('viewSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    renderAll();
+  });
+
+  // year
+  byId('yearSel').addEventListener('change',e=>{state.year=e.target.value;renderAll();});
+
+  // level
+  byId('levelList').addEventListener('click',e=>{
+    const r=e.target.closest('.radio'); if(!r)return;
+    state.level=r.dataset.level;
+    byId('levelList').querySelectorAll('.radio').forEach(x=>x.classList.toggle('on',x===r));
+    const pw=byId('pickerWrap'), ts=byId('targetSel');
+    if(state.level==='year'){pw.classList.remove('show');}
+    else{
+      pw.classList.add('show'); ts.innerHTML='';
+      const list = state.level==='party'?PARTIES:MPS;
+      list.forEach(it=>{const o=document.createElement('option');o.value=it.id;o.textContent=state.level==='mp'?`${it.name} · ${it.party}`:`${it.name} (${it.seats})`;ts.appendChild(o);});
+      state.target=list[0].id; ts.value=state.target;
+    }
+    renderAll();
+  });
+  byId('targetSel').addEventListener('change',e=>{state.target=e.target.value;renderAll();});
+
+  // activity
+  byId('actList').addEventListener('click',e=>{
+    const r=e.target.closest('.radio'); if(!r)return; setAct(r.dataset.act);
+  });
+
+  renderAll();
+  window.addEventListener('resize',()=>{ if(state.view==='analysis') renderTreemap(); });
+})();
+</script>
+</body>
+</html>
