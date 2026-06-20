@@ -1,0 +1,2970 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolitikKlar NRW</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+        /* === DESIGN TOKENS === */
+        :root {
+            --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+            --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+            --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+            --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+            --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+            --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+            --text-hero: clamp(2.5rem, 0.5rem + 6vw, 6rem);
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+            --space-24: 6rem;
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+            --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+            --font-display: 'Instrument Serif', Georgia, serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --content-narrow: 640px;
+            --content-default: 960px;
+            --content-wide: 1200px;
+        }
+
+        /* DARK MODE (default) */
+        :root,
+        [data-theme="dark"] {
+            --color-bg: #111110;
+            --color-surface: #181817;
+            --color-surface-2: #1e1d1b;
+            --color-surface-offset: #242321;
+            --color-surface-dynamic: #2d2c2a;
+            --color-divider: #2a2927;
+            --color-border: #363432;
+            --color-text: #e8e6e3;
+            --color-text-muted: #8a8885;
+            --color-text-faint: #5a5957;
+            --color-text-inverse: #1a1917;
+            --color-primary: #4f98a3;
+            --color-primary-hover: #3d8a96;
+            --color-primary-active: #2a7280;
+            --color-primary-highlight: #1e3538;
+            --color-accent: #e8a84e;
+            --color-accent-hover: #d4923a;
+            --color-success: #6daa45;
+            --color-error: #dd6974;
+            --color-shadow: oklch(0 0 0 / 0.35);
+            --shadow-sm: 0 1px 2px var(--color-shadow);
+            --shadow-md: 0 4px 16px var(--color-shadow);
+            --shadow-lg: 0 12px 40px var(--color-shadow);
+
+            /* Party colors */
+            --spd: #e4003a;
+            --cdu: #000000;
+            --gruene: #64a12d;
+            --fdp: #ffed00;
+            --afd: #0489db;
+            --spdlight: #e4003a22;
+            --cdulight: #ffffff15;
+            --gruenelight: #64a12d22;
+            --fdplight: #ffed0022;
+            --afdlight: #0489db22;
+        }
+
+        [data-theme="light"] {
+            --color-bg: #f7f6f2;
+            --color-surface: #f9f8f5;
+            --color-surface-2: #fbfbf9;
+            --color-surface-offset: #f0ede8;
+            --color-surface-dynamic: #e6e4df;
+            --color-divider: #dcd9d5;
+            --color-border: #d4d1ca;
+            --color-text: #28251d;
+            --color-text-muted: #7a7974;
+            --color-text-faint: #bab9b4;
+            --color-text-inverse: #f9f8f4;
+            --color-primary: #01696f;
+            --color-primary-hover: #0c4e54;
+            --color-primary-active: #0f3638;
+            --color-primary-highlight: #cedcd8;
+            --color-accent: #964219;
+            --color-accent-hover: #713417;
+            --color-success: #437a22;
+            --color-error: #a12c7b;
+            --color-shadow: oklch(0.2 0.01 80 / 0.1);
+            --shadow-sm: 0 1px 2px var(--color-shadow);
+            --shadow-md: 0 4px 16px var(--color-shadow);
+            --shadow-lg: 0 12px 40px var(--color-shadow);
+        }
+
+        /* === BASE === */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            min-height: 100dvh;
+            line-height: 1.6;
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            color: var(--color-text);
+            background: var(--color-bg);
+            overflow-x: hidden;
+        }
+
+        img,
+        svg {
+            display: block;
+            max-width: 100%;
+        }
+
+        button {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font: inherit;
+            color: inherit;
+        }
+
+        input {
+            font: inherit;
+            color: inherit;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 3px;
+            border-radius: var(--radius-sm);
+        }
+
+        ::selection {
+            background: oklch(from var(--color-primary) l c h / 0.25);
+            color: var(--color-text);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* === LAYOUT === */
+        .screen {
+            display: none;
+            min-height: 100dvh;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* === HEADER (for dashboard) === */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 56px;
+            background: oklch(from var(--color-bg) l c h / 0.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-6);
+            gap: var(--space-4);
+        }
+
+        .app-header .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            letter-spacing: -0.02em;
+        }
+
+        .app-header .logo svg {
+            color: var(--color-primary);
+        }
+
+        .app-header .spacer {
+            flex: 1;
+        }
+
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-muted);
+            transition: color var(--transition-interactive), background var(--transition-interactive);
+        }
+
+        .theme-toggle:hover {
+            color: var(--color-text);
+            background: var(--color-surface-dynamic);
+        }
+
+        /* === BUTTONS === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            line-height: 1;
+            transition: all var(--transition-interactive);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface-dynamic);
+            color: var(--color-text);
+            border-color: var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface-offset);
+        }
+
+        .btn-ghost {
+            color: var(--color-text-muted);
+        }
+
+        .btn-ghost:hover {
+            color: var(--color-text);
+            background: var(--color-surface-2);
+        }
+
+        .btn-lg {
+            padding: var(--space-4) var(--space-8);
+            font-size: var(--text-base);
+            border-radius: var(--radius-lg);
+        }
+
+        .btn-xl {
+            padding: var(--space-5) var(--space-12);
+            font-size: var(--text-lg);
+            border-radius: var(--radius-xl);
+            font-family: var(--font-display);
+            font-style: italic;
+            letter-spacing: -0.01em;
+        }
+
+        /* ========================
+   SCREEN 1 — LANDING
+======================== */
+        #screen-landing {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-12) var(--space-6);
+            min-height: 100dvh;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, oklch(from var(--color-primary) l c h / 0.15) 0%, transparent 70%),
+                var(--color-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .landing-noise {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+
+        .landing-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: var(--content-narrow);
+        }
+
+        .landing-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--text-xs);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            background: var(--color-primary-highlight);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-6);
+        }
+
+        .eyebrow-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        .landing-title {
+            font-family: var(--font-display);
+            font-size: var(--text-hero);
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--space-6);
+            background: linear-gradient(135deg in oklab, var(--color-text) 40%, var(--color-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .landing-subtitle {
+            font-size: var(--text-base);
+            color: var(--color-text-muted);
+            max-width: 52ch;
+            margin: 0 auto var(--space-10);
+        }
+
+        .landing-cta-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .landing-meta {
+            margin-top: var(--space-8);
+            display: flex;
+            gap: var(--space-6);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .landing-meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: var(--text-xs);
+            color: var(--color-text-faint);
+        }
+
+        .landing-meta-item strong {
+            font-size: var(--text-base);
+            color: var(--color-text-muted);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .landing-parties {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--space-12);
+        }
+
+        .party-chip {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            border: 1px solid currentColor;
+            opacity: 0.6;
+        }
+
+        .party-chip.spd {
+            color: var(--spd);
+        }
+
+        .party-chip.cdu {
+            color: #aaa;
+        }
+
+        .party-chip.gruene {
+            color: var(--gruene);
+        }
+
+        .party-chip.fdp {
+            color: #c8b800;
+        }
+
+        .party-chip.afd {
+            color: var(--afd);
+        }
+
+        /* ========================
+   SURVEY SCREENS (2,3,4,5)
+======================== */
+        .survey-screen {
+            flex-direction: column;
+            min-height: 100dvh;
+            background: var(--color-bg);
+        }
+
+        .survey-header {
+            padding: var(--space-6) var(--space-8);
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            border-bottom: 1px solid var(--color-divider);
+        }
+
+        .survey-logo {
+            font-weight: 600;
+            font-size: var(--text-sm);
+            color: var(--color-primary);
+        }
+
+        .survey-spacer {
+            flex: 1;
+        }
+
+        .survey-step-text {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+        }
+
+        .survey-progress {
+            height: 3px;
+            background: var(--color-divider);
+        }
+
+        .survey-progress-fill {
+            height: 100%;
+            background: var(--color-primary);
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .survey-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-12) var(--space-6);
+        }
+
+        .survey-card {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .survey-card-label {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: var(--space-3);
+        }
+
+        .survey-card-title {
+            font-family: var(--font-display);
+            font-size: var(--text-xl);
+            line-height: 1.15;
+            margin-bottom: var(--space-2);
+        }
+
+        .survey-card-subtitle {
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-8);
+        }
+
+        /* Personal info fields */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .form-label {
+            font-size: var(--text-xs);
+            font-weight: 500;
+            color: var(--color-text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .form-input {
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text);
+            font-size: var(--text-sm);
+            transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive);
+        }
+
+        .form-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px oklch(from var(--color-primary) l c h / 0.15);
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: var(--color-text-faint);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .radio-btn {
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all var(--transition-interactive);
+            color: var(--color-text-muted);
+        }
+
+        .radio-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-text);
+        }
+
+        .radio-btn.selected {
+            border-color: var(--color-primary);
+            background: var(--color-primary-highlight);
+            color: var(--color-primary);
+        }
+
+
+        .privacy-note {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            margin-bottom: var(--space-6);
+            border: 1px solid oklch(from var(--color-primary) l c h / 0.25);
+            background: color-mix(in oklab, var(--color-primary-highlight) 70%, var(--color-surface));
+            border-radius: var(--radius-lg);
+        }
+
+        .privacy-note-copy {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            max-width: 42ch;
+        }
+
+        .privacy-note-copy strong {
+            color: var(--color-text);
+            display: block;
+            margin-bottom: 0.15rem;
+            font-size: var(--text-sm);
+        }
+
+        .privacy-note .btn {
+            white-space: nowrap;
+        }
+
+        .paper-links {
+            margin-top: var(--space-4);
+        }
+
+        .paper-link-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .paper-link {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-3);
+            width: 100%;
+            text-align: left;
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface-2);
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: var(--text-xs);
+            transition: all var(--transition-interactive);
+        }
+
+        .paper-link:hover {
+            border-color: var(--color-primary);
+            background: var(--color-surface-offset);
+        }
+
+        .paper-link-left {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+            min-width: 0;
+        }
+
+        .paper-link-title {
+            font-size: var(--text-sm);
+            color: var(--color-text);
+        }
+
+        .paper-link-meta {
+            color: var(--color-text-faint);
+            font-size: var(--text-xs);
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .privacy-note {
+                flex-direction: column;
+            }
+        }
+
+        /* Option list (concerns) */
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4) var(--space-5);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            cursor: pointer;
+            transition: all var(--transition-interactive);
+            font-size: var(--text-sm);
+        }
+
+        .option-item:hover {
+            border-color: var(--color-primary);
+            background: var(--color-surface-2);
+        }
+
+        .option-item.selected {
+            border-color: var(--color-primary);
+            background: var(--color-primary-highlight);
+        }
+
+        .option-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--color-border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-interactive);
+        }
+
+        .option-item.selected .option-check {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .option-check-icon {
+            display: none;
+        }
+
+        .option-item.selected .option-check-icon {
+            display: block;
+            color: white;
+        }
+
+        .survey-footer {
+            padding: var(--space-6) var(--space-8);
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--color-divider);
+            gap: var(--space-4);
+        }
+
+        /* ========================
+   SCREEN — DASHBOARD
+======================== */
+        #screen-dashboard {
+            flex-direction: column;
+            padding-top: 56px;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            flex: 1;
+            min-height: calc(100dvh - 56px);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: var(--color-surface);
+            border-right: 1px solid var(--color-divider);
+            padding: var(--space-6);
+            overflow-y: auto;
+            position: sticky;
+            top: 56px;
+            height: calc(100dvh - 56px);
+        }
+
+        .sidebar-section {
+            margin-bottom: var(--space-8);
+        }
+
+        .sidebar-section-title {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-text-faint);
+            margin-bottom: var(--space-3);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .filter-chip {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-xs);
+            cursor: pointer;
+            transition: all var(--transition-interactive);
+            border: 1px solid transparent;
+            color: var(--color-text-muted);
+        }
+
+        .filter-chip:hover {
+            background: var(--color-surface-dynamic);
+            color: var(--color-text);
+        }
+
+        .filter-chip.active {
+            background: var(--color-primary-highlight);
+            border-color: oklch(from var(--color-primary) l c h / 0.3);
+            color: var(--color-primary);
+        }
+
+        .filter-chip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .filter-chip-count {
+            margin-left: auto;
+            font-size: var(--text-xs);
+            color: var(--color-text-faint);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .activity-filter-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .act-filter {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-xs);
+            cursor: pointer;
+            transition: all var(--transition-interactive);
+            color: var(--color-text-muted);
+            border: 1px solid transparent;
+        }
+
+        .act-filter:hover {
+            background: var(--color-surface-dynamic);
+            color: var(--color-text);
+        }
+
+        .act-filter.active {
+            background: var(--color-surface-offset);
+            color: var(--color-text);
+        }
+
+        .act-filter input[type="checkbox"] {
+            accent-color: var(--color-primary);
+        }
+
+        .concern-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .concern-tag {
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: 500;
+            background: var(--color-primary-highlight);
+            color: var(--color-primary);
+            border: 1px solid oklch(from var(--color-primary) l c h / 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .dashboard-main {
+            padding: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+            min-width: 0;
+        }
+
+        .dashboard-title-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        .dashboard-title {
+            font-size: clamp(1.4rem, 1.1rem + 0.8vw, 2rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+        }
+
+        .dashboard-subtitle {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-3);
+        }
+
+        .kpi-card {
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            min-height: 108px;
+        }
+
+        .kpi-label {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            margin-bottom: 0.15rem;
+        }
+
+        .kpi-value {
+            font-size: clamp(1.8rem, 1.4rem + 1vw, 2.45rem);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums lining-nums;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+        }
+
+        .kpi-delta {
+            font-size: var(--text-xs);
+            margin-top: 0.25rem;
+        }
+
+        .kpi-delta.up {
+            color: var(--color-success);
+        }
+
+        .kpi-delta.down {
+            color: var(--color-error);
+        }
+
+        /* GRAPH AREA */
+        .graph-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            position: relative;
+            flex: 1;
+            min-height: 560px;
+        }
+
+        .graph-toolbar {
+            position: absolute;
+            top: var(--space-4);
+            right: var(--space-4);
+            z-index: 10;
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .graph-toolbar-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all var(--transition-interactive);
+        }
+
+        .graph-toolbar-btn:hover {
+            color: var(--color-text);
+            background: var(--color-surface-dynamic);
+        }
+
+        #graph-svg {
+            width: 100%;
+            height: 100%;
+            min-height: 560px;
+        }
+
+        /* NODE TOOLTIP */
+        .node-tooltip {
+            position: absolute;
+            pointer-events: none;
+            z-index: 50;
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3) var(--space-4);
+            box-shadow: var(--shadow-lg);
+            max-width: 240px;
+            font-size: var(--text-xs);
+            line-height: 1.5;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .node-tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-party {
+            font-weight: 600;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-1);
+        }
+
+        .tooltip-topic {
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-2);
+        }
+
+        .tooltip-activity {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+
+        .tooltip-activity-label {
+            color: var(--color-text-faint);
+        }
+
+        .tooltip-activity-count {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* DETAIL PANEL */
+        .detail-panel {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--color-surface);
+            border-left: 1px solid var(--color-divider);
+            padding: var(--space-5);
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 20;
+        }
+
+        .detail-panel.open {
+            transform: translateX(0);
+        }
+
+        .detail-panel-close {
+            float: right;
+            color: var(--color-text-muted);
+        }
+
+        .detail-panel-title {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+            padding-right: var(--space-8);
+        }
+
+        .detail-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-2) 0;
+            border-bottom: 1px solid var(--color-divider);
+            font-size: var(--text-xs);
+        }
+
+        .detail-stat-label {
+            color: var(--color-text-muted);
+        }
+
+        .detail-stat-value {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .detail-activities {
+            margin-top: var(--space-4);
+        }
+
+        .detail-activities-title {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-text-faint);
+            margin-bottom: var(--space-3);
+        }
+
+        .activity-row {
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--color-divider);
+            font-size: var(--text-xs);
+            line-height: 1.4;
+        }
+
+        .activity-row-title {
+            color: var(--color-text);
+            margin-bottom: var(--space-1);
+        }
+
+        .activity-row-meta {
+            color: var(--color-text-faint);
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .activity-badge {
+            padding: 0 var(--space-2);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--color-border);
+        }
+
+        /* LEGEND */
+        .graph-legend {
+            position: absolute;
+            bottom: var(--space-4);
+            left: var(--space-4);
+            z-index: 10;
+            background: oklch(from var(--color-surface) l c h / 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3) var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            font-size: var(--text-xs);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--color-text-muted);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* HIGHLIGHTED NODE */
+        .highlighted {
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+
+        .concern-dropdown {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .concern-dropdown-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            font-size: var(--text-sm);
+        }
+
+        .concern-dropdown-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .concern-dropdown-summary small {
+            color: var(--color-text-faint);
+            font-size: var(--text-xs);
+        }
+
+        .concern-dropdown-chevron {
+            transition: transform var(--transition-interactive);
+            color: var(--color-text-muted);
+        }
+
+        .concern-dropdown.open .concern-dropdown-chevron {
+            transform: rotate(180deg);
+        }
+
+        .concern-dropdown-panel {
+            display: none;
+            flex-direction: column;
+            gap: var(--space-2);
+            padding-top: var(--space-2);
+        }
+
+        .concern-dropdown.open .concern-dropdown-panel {
+            display: flex;
+        }
+
+        .concern-toggle {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface-2);
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all var(--transition-interactive);
+        }
+
+        .concern-toggle:hover {
+            border-color: var(--color-primary);
+        }
+
+        .concern-toggle.active {
+            background: var(--color-primary-highlight);
+            color: var(--color-primary);
+            border-color: oklch(from var(--color-primary) l c h / 0.35);
+        }
+
+        .concern-toggle-switch {
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 2px solid var(--color-border);
+            background: transparent;
+            transition: all var(--transition-interactive);
+        }
+
+        .concern-toggle.active .concern-toggle-switch {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px oklch(from var(--color-primary) l c h / 0.12);
+        }
+
+        .concern-toggle-text {
+            font-size: var(--text-xs);
+            line-height: 1.45;
+        }
+
+        .node-muted {
+            opacity: 0.28;
+        }
+
+        .link-muted {
+            opacity: 0.12;
+        }
+
+        .party-relevant-ring {
+            filter: drop-shadow(0 0 8px var(--color-accent));
+        }
+
+        .detail-panel {
+            width: 360px;
+        }
+
+        .doc-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-6);
+        }
+
+        .doc-modal.open {
+            display: flex;
+        }
+
+        .doc-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.58);
+            backdrop-filter: blur(4px);
+        }
+
+        .doc-modal-card {
+            position: relative;
+            z-index: 1;
+            width: min(700px, 100%);
+            max-height: min(84dvh, 860px);
+            overflow: auto;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            padding: var(--space-5);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .doc-modal-card::-webkit-scrollbar {
+            display: none;
+        }
+
+        .doc-modal-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .doc-source-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            color: var(--color-accent);
+            background: color-mix(in oklab, var(--color-accent) 12%, var(--color-surface-2));
+            border: 1px solid color-mix(in oklab, var(--color-accent) 28%, var(--color-border));
+        }
+
+        .doc-modal h3 {
+            font-size: clamp(1.3rem, 1.1rem + 0.4vw, 1.75rem);
+            line-height: 1.2;
+            margin-bottom: var(--space-1);
+        }
+
+        .doc-full-title {
+            color: var(--color-text-muted);
+            font-size: var(--text-xs);
+            margin-bottom: var(--space-2);
+            max-width: 62ch;
+        }
+
+        .doc-link-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-4);
+        }
+
+        .doc-link-row a {
+            color: var(--color-primary);
+        }
+
+        .doc-section {
+            margin-top: var(--space-4);
+        }
+
+        .doc-section-title {
+            font-size: var(--text-xs);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-text-faint);
+            margin-bottom: var(--space-2);
+        }
+
+        .doc-summary-box {
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            color: var(--color-text);
+            line-height: 1.45;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--space-3);
+        }
+
+        .impact-card {
+            padding: var(--space-3);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface-2);
+        }
+
+        .impact-card-head {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-1);
+            font-size: var(--text-sm);
+            font-weight: 600;
+        }
+
+        .impact-card p {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            line-height: 1.4;
+        }
+
+        .stance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: var(--space-3);
+        }
+
+        .stance-card {
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface-2);
+        }
+
+        .stance-card strong {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .stance-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .stance-chip {
+            padding: 0.2rem 0.55rem;
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            border: 1px solid var(--color-border);
+        }
+
+        .stance-chip.support {
+            color: var(--color-success);
+            border-color: color-mix(in oklab, var(--color-success) 45%, var(--color-border));
+        }
+
+        .stance-chip.oppose {
+            color: var(--color-error);
+            border-color: color-mix(in oklab, var(--color-error) 45%, var(--color-border));
+        }
+
+        .stance-chip.neutral {
+            color: var(--color-text-muted);
+        }
+
+        @media (max-width: 768px) {
+
+            .impact-grid,
+            .stance-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-panel {
+                width: min(88vw, 360px);
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                overflow: visible;
+            }
+
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .animate-in-delay-1 {
+            animation-delay: 0.08s;
+        }
+
+        .animate-in-delay-2 {
+            animation-delay: 0.16s;
+        }
+
+        .animate-in-delay-3 {
+            animation-delay: 0.24s;
+        }
+
+        .animate-in-delay-4 {
+            animation-delay: 0.32s;
+        }
+
+        /* Legend dots */
+        .dot-spd {
+            background: var(--spd);
+        }
+
+        .dot-cdu {
+            background: #888;
+        }
+
+        .dot-gruene {
+            background: var(--gruene);
+        }
+
+        .dot-fdp {
+            background: #c8b800;
+        }
+
+        .dot-afd {
+            background: var(--afd);
+        }
+
+        /* node highlight ring */
+        .concern-highlight {
+            stroke: var(--color-accent) !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 6px var(--color-accent));
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ======================== SCREEN 1: LANDING ======================== -->
+    <div id="screen-landing" class="screen active">
+        <div class="landing-noise"></div>
+        <div class="landing-content">
+            <div class="landing-eyebrow animate-in">
+                <span class="eyebrow-dot"></span>
+                NRW Landtag · Echtzeit-Analyse
+            </div>
+            <h1 class="landing-title animate-in animate-in-delay-1">PolitikKlar<br>NRW</h1>
+            <p class="landing-subtitle animate-in animate-in-delay-2">
+                Wir zeigen dir, was deine Abgeordneten im Landtag wirklich tun — basierend auf deinen Anliegen, klar und
+                transparent.
+            </p>
+            <div class="landing-cta-group animate-in animate-in-delay-3">
+                <button class="btn btn-primary btn-xl" onclick="goTo('screen-survey-personal')">
+                    Jetzt starten →
+                </button>
+                <span style="font-size:var(--text-xs); color:var(--color-text-faint);">Dauert ca. 2 Minuten</span>
+            </div>
+
+            <div class="landing-meta animate-in animate-in-delay-4">
+                <div class="landing-meta-item"><strong>1.247</strong>Gesetzesentwürfe</div>
+                <div class="landing-meta-item"><strong>6</strong>Fraktionen</div>
+                <div class="landing-meta-item"><strong>199</strong>Abgeordnete</div>
+                <div class="landing-meta-item"><strong>2022–2027</strong>Wahlperiode</div>
+            </div>
+
+            <div class="landing-parties animate-in animate-in-delay-4">
+                <span class="party-chip spd">SPD</span>
+                <span class="party-chip cdu">CDU</span>
+                <span class="party-chip gruene">GRÜNE</span>
+                <span class="party-chip fdp">FDP</span>
+                <span class="party-chip afd">AfD</span>
+            </div>
+
+            <div style="position:absolute;top:var(--space-4);right:var(--space-6);z-index:10;">
+                <button class="theme-toggle" data-theme-toggle aria-label="Theme wechseln" onclick="toggleTheme()"
+                    style="width:36px;height:36px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:all var(--transition-interactive);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================== SCREEN 2: PERSONAL INFO ======================== -->
+    <div id="screen-survey-personal" class="screen survey-screen">
+        <div class="survey-header">
+            <span class="survey-logo">PolitikKlar NRW</span>
+            <div class="survey-spacer"></div>
+            <span class="survey-step-text">Schritt 1 / 4</span>
+            <button class="theme-toggle" onclick="toggleTheme()"
+                style="width:32px;height:32px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+            </button>
+        </div>
+        <div class="survey-progress">
+            <div class="survey-progress-fill" style="width:25%"></div>
+        </div>
+        <div class="survey-body">
+            <div class="survey-card animate-in">
+                <div class="survey-card-label">Persönliche Angaben</div>
+                <h2 class="survey-card-title">Damit wir relevante Inhalte finden können</h2>
+                <p class="survey-card-subtitle">Diese Infos helfen uns, die Parlamentsarbeit nach deinen Prioritäten zu
+                    filtern.</p>
+                <div class="privacy-note">
+                    <div class="privacy-note-copy">
+                        <strong>Keine Angabe erforderlich</strong>
+                        Alle Felder in diesem Schritt sind optional. Du kannst ohne persönliche Angaben fortfahren oder
+                        diesen Schritt komplett überspringen.
+                    </div>
+                    <button class="btn btn-secondary" type="button" onclick="skipPersonalInfo()">Ohne Angaben
+                        fortfahren</button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label">Alter</label>
+                        <input class="form-input" type="number" id="input-age" placeholder="z.B. 29" min="16" max="99">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Geschlecht</label>
+                        <div class="radio-group" id="gender-group">
+                            <button class="radio-btn" onclick="selectRadio('gender-group',this,'w')">Weiblich</button>
+                            <button class="radio-btn" onclick="selectRadio('gender-group',this,'m')">Männlich</button>
+                            <button class="radio-btn" onclick="selectRadio('gender-group',this,'d')">Divers</button>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Familienstand</label>
+                        <div class="radio-group" id="family-group">
+                            <button class="radio-btn" onclick="selectRadio('family-group',this,'single')">Ledig</button>
+                            <button class="radio-btn"
+                                onclick="selectRadio('family-group',this,'married')">Verheiratet</button>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Kinder</label>
+                        <input class="form-input" type="number" id="input-children" placeholder="Anzahl" min="0"
+                            max="10">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+                    <div class="form-field">
+                        <label class="form-label">Kreis / Stadt</label>
+                        <select class="form-input" id="input-city">
+                            <option value="">Bitte wählen…</option>
+                            <option>Essen</option>
+                            <option>Düsseldorf</option>
+                            <option>Köln</option>
+                            <option>Dortmund</option>
+                            <option>Bochum</option>
+                            <option>Wuppertal</option>
+                            <option>Bielefeld</option>
+                            <option>Bonn</option>
+                            <option>Münster</option>
+                            <option>Andere Stadt</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Beruf</label>
+                        <input class="form-input" type="text" id="input-job" placeholder="z.B. Ingenieur">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Bildung</label>
+                        <select class="form-input" id="input-edu">
+                            <option value="">Bitte wählen…</option>
+                            <option>Hauptschulabschluss</option>
+                            <option>Realschulabschluss</option>
+                            <option>Abitur</option>
+                            <option>Bachelor</option>
+                            <option>Master / Diplom</option>
+                            <option>Promotion</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="survey-footer">
+            <button class="btn btn-ghost" onclick="goTo('screen-landing')">← Zurück</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary" onclick="goTo('screen-survey-concerns')">Weiter →</button>
+        </div>
+    </div>
+
+    <!-- ======================== SCREEN 3: DAILY CONCERNS ======================== -->
+    <div id="screen-survey-concerns" class="screen survey-screen">
+        <div class="survey-header">
+            <span class="survey-logo">PolitikKlar NRW</span>
+            <div class="survey-spacer"></div>
+            <span class="survey-step-text">Schritt 2 / 4</span>
+        </div>
+        <div class="survey-progress">
+            <div class="survey-progress-fill" style="width:50%"></div>
+        </div>
+        <div class="survey-body">
+            <div class="survey-card animate-in">
+                <div class="survey-card-label">Tägliche Sorgen</div>
+                <h2 class="survey-card-title">Was beschäftigt dich am meisten?</h2>
+                <p class="survey-card-subtitle">Wähle bis zu 3 Themen, die dich täglich bewegen.</p>
+                <div class="option-list" id="concerns-list">
+                    <div class="option-item" onclick="toggleOption(this,'Kaufkraftverlust durch Inflation')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Kaufkraftverlust durch Inflation</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Arbeitslosigkeit & Jobsicherheit')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Arbeitslosigkeit &amp; Jobsicherheit</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Wohnungsknappheit & steigende Mieten')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Wohnungsknappheit &amp; steigende Mieten</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Straßensicherheit & öffentliche Ordnung')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Straßensicherheit &amp; öffentliche Ordnung</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Bildung & Schulqualität')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Bildung &amp; Schulqualität</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Klimawandel & Umweltschutz')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Klimawandel &amp; Umweltschutz</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="survey-footer">
+            <button class="btn btn-ghost" onclick="goTo('screen-survey-personal')">← Zurück</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary" onclick="goTo('screen-survey-financial')">Weiter →</button>
+        </div>
+    </div>
+
+    <!-- ======================== SCREEN 4: FINANCIAL CONCERNS ======================== -->
+    <div id="screen-survey-financial" class="screen survey-screen">
+        <div class="survey-header">
+            <span class="survey-logo">PolitikKlar NRW</span>
+            <div class="survey-spacer"></div>
+            <span class="survey-step-text">Schritt 3 / 4</span>
+        </div>
+        <div class="survey-progress">
+            <div class="survey-progress-fill" style="width:75%"></div>
+        </div>
+        <div class="survey-body">
+            <div class="survey-card animate-in">
+                <div class="survey-card-label">Finanzielle Lage</div>
+                <h2 class="survey-card-title">Wo drückt der Schuh finanziell?</h2>
+                <p class="survey-card-subtitle">Wähle die Ausgabenbereiche, die dein Budget belasten.</p>
+                <div class="option-list" id="financial-list">
+                    <div class="option-item" onclick="toggleOption(this,'Miete & Wohnkosten')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Miete &amp; Wohnkosten</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Lebensmittel & Grundbedarf')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Lebensmittel &amp; Grundbedarf</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Gesundheit & Medikamente')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Gesundheit &amp; Medikamente</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Energie & Heizkosten')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Energie &amp; Heizkosten</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Mobilität & Verkehr')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Mobilität &amp; Verkehr</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Kinderbetreuung & Bildungskosten')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Kinderbetreuung &amp; Bildungskosten</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="survey-footer">
+            <button class="btn btn-ghost" onclick="goTo('screen-survey-concerns')">← Zurück</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary" onclick="goTo('screen-survey-policy')">Weiter →</button>
+        </div>
+    </div>
+
+    <!-- ======================== SCREEN 5: POLICY PRIORITIES ======================== -->
+    <div id="screen-survey-policy" class="screen survey-screen">
+        <div class="survey-header">
+            <span class="survey-logo">PolitikKlar NRW</span>
+            <div class="survey-spacer"></div>
+            <span class="survey-step-text">Schritt 4 / 4</span>
+        </div>
+        <div class="survey-progress">
+            <div class="survey-progress-fill" style="width:100%"></div>
+        </div>
+        <div class="survey-body">
+            <div class="survey-card animate-in">
+                <div class="survey-card-label">Politische Prioritäten</div>
+                <h2 class="survey-card-title">Welche Gesetzgebung würdest du zuerst angehen?</h2>
+                <p class="survey-card-subtitle">Das hilft uns, die Visualisierung auf deine Interessen auszurichten.</p>
+                <div class="option-list" id="policy-list">
+                    <div class="option-item" onclick="toggleOption(this,'Mietpreisbremse & Wohnungsbauprogramm')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Mietpreisbremse &amp; Wohnungsbauprogramm</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Stärkung der Zentralbank-Unabhängigkeit')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Stärkung der Zentralbank-Unabhängigkeit</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Verlängerung des Arbeitslosengeldes')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Verlängerung des Arbeitslosengeldes</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Mehr Polizei & Sicherheitsmaßnahmen')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Mehr Polizei &amp; Sicherheitsmaßnahmen</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Klimaschutzgesetz NRW')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Klimaschutzgesetz NRW</span>
+                    </div>
+                    <div class="option-item" onclick="toggleOption(this,'Schulreform & mehr Lehrkräfte')">
+                        <div class="option-check"><svg class="option-check-icon" width="12" height="12"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg></div>
+                        <span>Schulreform &amp; mehr Lehrkräfte</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="survey-footer">
+            <button class="btn btn-ghost" onclick="goTo('screen-survey-financial')">← Zurück</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary btn-lg" onclick="buildDashboard()">
+                Ergebnisse anzeigen →
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================== SCREEN 6: DASHBOARD ======================== -->
+    <div id="screen-dashboard" class="screen">
+        <!-- Fixed header -->
+        <header class="app-header">
+            <div class="logo">
+                <svg width="22" height="22" viewBox="0 0 36 36" fill="none" aria-label="PolitikKlar Logo">
+                    <rect width="36" height="36" rx="8" fill="currentColor" opacity="0.1" />
+                    <path d="M8 26L18 10L28 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <circle cx="18" cy="10" r="2.5" fill="currentColor" />
+                    <line x1="12" y1="22" x2="24" y2="22" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" />
+                </svg>
+                PolitikKlar NRW
+            </div>
+            <span id="header-concern-summary" style="font-size:var(--text-xs);color:var(--color-text-muted);"></span>
+            <div class="spacer"></div>
+            <button class="btn btn-ghost" style="font-size:var(--text-xs);" onclick="goTo('screen-landing')">← Neu
+                starten</button>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Theme"
+                style="width:36px;height:36px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+            </button>
+        </header>
+
+        <div class="dashboard-layout">
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Deine Anliegen</div>
+                    <div class="concern-dropdown" id="concern-dropdown">
+                        <button class="concern-dropdown-btn" type="button" onclick="toggleConcernDropdown()">
+                            <span class="concern-dropdown-summary">
+                                <span id="concern-dropdown-title">Deine Anliegen</span>
+                                <small id="concern-dropdown-subtitle">0 aktiv</small>
+                            </span>
+                            <span class="concern-dropdown-chevron">⌄</span>
+                        </button>
+                        <div class="concern-dropdown-panel" id="user-concern-list"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Partei filtern</div>
+                    <div class="filter-group" id="party-filters">
+                        <div class="filter-chip active" data-party="SPD" onclick="togglePartyFilter(this)">
+                            <span class="filter-chip-dot dot-spd"></span> SPD <span class="filter-chip-count">312</span>
+                        </div>
+                        <div class="filter-chip active" data-party="CDU" onclick="togglePartyFilter(this)">
+                            <span class="filter-chip-dot dot-cdu"></span> CDU <span class="filter-chip-count">287</span>
+                        </div>
+                        <div class="filter-chip active" data-party="GRÜNE" onclick="togglePartyFilter(this)">
+                            <span class="filter-chip-dot dot-gruene"></span> GRÜNE <span
+                                class="filter-chip-count">198</span>
+                        </div>
+                        <div class="filter-chip active" data-party="FDP" onclick="togglePartyFilter(this)">
+                            <span class="filter-chip-dot dot-fdp"></span> FDP <span class="filter-chip-count">143</span>
+                        </div>
+                        <div class="filter-chip active" data-party="AfD" onclick="togglePartyFilter(this)">
+                            <span class="filter-chip-dot dot-afd"></span> AfD <span class="filter-chip-count">107</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Aktivitätstyp</div>
+                    <div class="activity-filter-list" id="activity-filters">
+                        <label class="act-filter active">
+                            <input type="checkbox" checked onchange="updateGraph()"> Gesetzesentwürfe
+                        </label>
+                        <label class="act-filter active">
+                            <input type="checkbox" checked onchange="updateGraph()"> Anfragen
+                        </label>
+                        <label class="act-filter active">
+                            <input type="checkbox" checked onchange="updateGraph()"> Anträge
+                        </label>
+                        <label class="act-filter active">
+                            <input type="checkbox" checked onchange="updateGraph()"> Debatten
+                        </label>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Wahlperiode</div>
+                    <div class="filter-group">
+                        <div class="filter-chip active" style="cursor:default;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            17. WP · 2022–2027
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN -->
+            <main class="dashboard-main">
+                <div class="dashboard-title-row">
+                    <div>
+                        <div class="dashboard-title">Parlamentsnetzwerk NRW</div>
+                        <div class="dashboard-subtitle">Klicke auf einen Knoten, um Details zu sehen · Ziehe zum Bewegen
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Gesetzesentwürfe</div>
+                        <div class="kpi-value" id="kpi-bills">1.247</div>
+                        <div class="kpi-delta up">↑ 12% vs. letzte WP</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Schriftl. Anfragen</div>
+                        <div class="kpi-value" id="kpi-questions">3.842</div>
+                        <div class="kpi-delta up">↑ 8% vs. letzte WP</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Abstimmungen</div>
+                        <div class="kpi-value" id="kpi-votes">589</div>
+                        <div class="kpi-delta down">↓ 3% vs. letzte WP</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Relevante Treffer</div>
+                        <div class="kpi-value" id="kpi-matches" style="color:var(--color-accent)">–</div>
+                        <div class="kpi-delta" id="kpi-matches-label" style="color:var(--color-text-faint)">basierend
+                            auf deinem Profil</div>
+                    </div>
+                </div>
+
+                <!-- GRAPH -->
+                <div class="graph-container" id="graph-container">
+                    <div class="graph-toolbar">
+                        <button class="graph-toolbar-btn" onclick="zoomIn()" title="Rein zoomen">+</button>
+                        <button class="graph-toolbar-btn" onclick="zoomOut()" title="Raus zoomen">−</button>
+                        <button class="graph-toolbar-btn" onclick="resetZoom()" title="Zurücksetzen">⊙</button>
+                    </div>
+
+                    <svg id="graph-svg"></svg>
+
+                    <div class="graph-legend">
+                        <div class="legend-item"><span class="legend-dot dot-spd"></span> SPD</div>
+                        <div class="legend-item"><span class="legend-dot dot-cdu"></span> CDU</div>
+                        <div class="legend-item"><span class="legend-dot dot-gruene"></span> GRÜNE</div>
+                        <div class="legend-item"><span class="legend-dot dot-fdp"></span> FDP</div>
+                        <div class="legend-item"><span class="legend-dot dot-afd"></span> AfD</div>
+                        <div class="legend-item" style="margin-top:var(--space-2);">
+                            <span
+                                style="width:10px;height:10px;border-radius:50%;border:2px solid var(--color-accent);flex-shrink:0;"></span>
+                            Dein Anliegen
+                        </div>
+                    </div>
+
+                    <!-- Detail Panel -->
+                    <div class="detail-panel" id="detail-panel">
+                        <button class="detail-panel-close btn-ghost" onclick="closeDetail()"
+                            style="font-size:var(--text-lg);padding:var(--space-1);">×</button>
+                        <div class="detail-panel-title" id="detail-title">—</div>
+                        <div id="detail-stats"></div>
+                        <div class="paper-links" id="detail-papers"></div>
+                        <div class="detail-activities" id="detail-activities"></div>
+                    </div>
+
+                    <div class="node-tooltip" id="node-tooltip">
+                        <div class="tooltip-party" id="tt-party"></div>
+                        <div class="tooltip-topic" id="tt-topic"></div>
+                        <div class="tooltip-activity">
+                            <span class="tooltip-activity-label">Aktivitäten</span>
+                            <span class="tooltip-activity-count" id="tt-count"></span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="doc-modal" id="doc-modal" aria-hidden="true">
+        <div class="doc-modal-backdrop" onclick="closeDocModal()"></div>
+        <div class="doc-modal-card">
+            <div class="doc-modal-top">
+                <div>
+                    <div class="doc-source-badge" id="doc-source-badge">Quelle</div>
+                    <h3 id="doc-modal-title">Dokument</h3>
+                </div>
+                <button class="btn btn-ghost" type="button" onclick="closeDocModal()">✕</button>
+            </div>
+            <div class="doc-full-title" id="doc-full-title"></div>
+            <div class="doc-link-row">
+                <a id="doc-modal-link" href="#" target="_blank" rel="noopener noreferrer">Originaldokument öffnen ↗</a>
+                <span class="paper-link-meta" id="doc-meta"></span>
+            </div>
+
+            <div class="doc-section">
+                <div class="doc-section-title">Kurz erklärt</div>
+                <div class="doc-summary-box" id="doc-summary"></div>
+            </div>
+
+            <div class="doc-section">
+                <div class="doc-section-title">Für dich</div>
+                <div class="impact-grid" id="doc-impacts"></div>
+            </div>
+
+            <div class="doc-section">
+                <div class="doc-section-title">Parteien</div>
+                <div class="stance-grid">
+                    <div class="stance-card">
+                        <strong>👍 Dafür</strong>
+                        <div class="stance-chip-row" id="doc-support"></div>
+                    </div>
+                    <div class="stance-card">
+                        <strong>👎 Dagegen</strong>
+                        <div class="stance-chip-row" id="doc-oppose"></div>
+                    </div>
+                    <div class="stance-card">
+                        <strong>➖ Offen</strong>
+                        <div class="stance-chip-row" id="doc-neutral"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === STATE ===
+        const state = {
+            currentScreen: 'screen-landing',
+            selectedConcerns: [],
+            selectedFinancial: [],
+            selectedPolicy: [],
+            userProfile: {},
+            activeParties: new Set(['SPD', 'CDU', 'GRÜNE', 'FDP', 'AfD']),
+            activeConcernFilters: new Set(),
+            concernDropdownOpen: false,
+            theme: 'dark'
+        };
+
+        // === NAVIGATION ===
+        function goTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            target.classList.add('active');
+            state.currentScreen = screenId;
+            window.scrollTo(0, 0);
+        }
+
+        // === THEME ===
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', state.theme);
+            if (state.currentScreen === 'screen-dashboard') {
+                setTimeout(() => initGraph(), 100);
+            }
+        }
+
+        function skipPersonalInfo() {
+            ['input-age', 'input-children', 'input-city', 'input-job', 'input-edu'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.querySelectorAll('#gender-group .radio-btn, #family-group .radio-btn').forEach(btn => btn.classList.remove('selected'));
+            goTo('screen-survey-concerns');
+        }
+
+        // === RADIO SELECTION ===
+        function selectRadio(groupId, btn, value) {
+            document.querySelectorAll(`#${groupId} .radio-btn`).forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        // === OPTION TOGGLE (survey) ===
+        function toggleOption(el, value) {
+            const listId = el.closest('.option-list').id;
+            const arr = listId === 'concerns-list' ? state.selectedConcerns
+                : listId === 'financial-list' ? state.selectedFinancial
+                    : state.selectedPolicy;
+            const idx = arr.indexOf(value);
+            if (idx > -1) {
+                arr.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (arr.length >= 3) return; // max 3
+                arr.push(value);
+                el.classList.add('selected');
+            }
+        }
+
+        // === PARTY FILTER ===
+        function togglePartyFilter(el) {
+            const party = el.dataset.party;
+            if (el.classList.contains('active')) {
+                el.classList.remove('active');
+                state.activeParties.delete(party);
+            } else {
+                el.classList.add('active');
+                state.activeParties.add(party);
+            }
+            updateGraph();
+        }
+
+        // === MOCK DATA ===
+        const PARTY_COLORS = {
+            'SPD': '#e4003a', 'CDU': '#999', 'GRÜNE': '#64a12d', 'FDP': '#c8b800', 'AfD': '#0489db'
+        };
+
+        const TOPICS = [
+            'Wohnen & Mieten', 'Bildung', 'Klimaschutz', 'Innere Sicherheit',
+            'Wirtschaft & Arbeit', 'Gesundheit', 'Mobilität & Verkehr', 'Energie',
+            'Soziales', 'Digitalisierung'
+        ];
+
+        const PARTIES = ['SPD', 'CDU', 'GRÜNE', 'FDP', 'AfD'];
+
+        const ACTIVITIES_MOCK = {
+            'SPD': {
+                'Wohnen & Mieten': { bills: 42, questions: 88, motions: 31 },
+                'Wirtschaft & Arbeit': { bills: 38, questions: 72, motions: 24 },
+                'Soziales': { bills: 51, questions: 94, motions: 40 },
+                'Gesundheit': { bills: 28, questions: 61, motions: 19 },
+                'Bildung': { bills: 22, questions: 55, motions: 18 },
+                'Klimaschutz': { bills: 15, questions: 44, motions: 12 },
+                'Innere Sicherheit': { bills: 12, questions: 38, motions: 10 },
+                'Mobilität & Verkehr': { bills: 18, questions: 42, motions: 14 },
+                'Energie': { bills: 14, questions: 37, motions: 11 },
+                'Digitalisierung': { bills: 10, questions: 29, motions: 8 },
+            },
+            'CDU': {
+                'Wohnen & Mieten': { bills: 31, questions: 55, motions: 22 },
+                'Wirtschaft & Arbeit': { bills: 49, questions: 81, motions: 35 },
+                'Soziales': { bills: 22, questions: 48, motions: 16 },
+                'Gesundheit': { bills: 24, questions: 53, motions: 18 },
+                'Bildung': { bills: 33, questions: 67, motions: 28 },
+                'Klimaschutz': { bills: 11, questions: 28, motions: 9 },
+                'Innere Sicherheit': { bills: 39, questions: 73, motions: 31 },
+                'Mobilität & Verkehr': { bills: 21, questions: 44, motions: 17 },
+                'Energie': { bills: 28, questions: 58, motions: 22 },
+                'Digitalisierung': { bills: 19, questions: 41, motions: 15 },
+            },
+            'GRÜNE': {
+                'Klimaschutz': { bills: 55, questions: 98, motions: 44 },
+                'Mobilität & Verkehr': { bills: 38, questions: 72, motions: 30 },
+                'Energie': { bills: 44, questions: 85, motions: 36 },
+                'Bildung': { bills: 21, questions: 48, motions: 17 },
+                'Wohnen & Mieten': { bills: 28, questions: 59, motions: 23 },
+                'Wirtschaft & Arbeit': { bills: 14, questions: 32, motions: 11 },
+                'Soziales': { bills: 19, questions: 44, motions: 15 },
+                'Gesundheit': { bills: 16, questions: 38, motions: 13 },
+                'Innere Sicherheit': { bills: 8, questions: 21, motions: 7 },
+                'Digitalisierung': { bills: 22, questions: 47, motions: 18 },
+            },
+            'FDP': {
+                'Wirtschaft & Arbeit': { bills: 44, questions: 69, motions: 33 },
+                'Digitalisierung': { bills: 31, questions: 58, motions: 25 },
+                'Bildung': { bills: 22, questions: 44, motions: 18 },
+                'Energie': { bills: 18, questions: 37, motions: 14 },
+                'Mobilität & Verkehr': { bills: 15, questions: 31, motions: 11 },
+                'Klimaschutz': { bills: 8, questions: 19, motions: 6 },
+                'Wohnen & Mieten': { bills: 12, questions: 24, motions: 9 },
+                'Soziales': { bills: 11, questions: 22, motions: 8 },
+                'Gesundheit': { bills: 13, questions: 26, motions: 10 },
+                'Innere Sicherheit': { bills: 9, questions: 18, motions: 7 },
+            },
+            'AfD': {
+                'Innere Sicherheit': { bills: 38, questions: 67, motions: 29 },
+                'Wirtschaft & Arbeit': { bills: 22, questions: 41, motions: 18 },
+                'Wohnen & Mieten': { bills: 14, questions: 28, motions: 11 },
+                'Energie': { bills: 17, questions: 33, motions: 13 },
+                'Soziales': { bills: 12, questions: 24, motions: 9 },
+                'Bildung': { bills: 9, questions: 18, motions: 7 },
+                'Klimaschutz': { bills: 5, questions: 10, motions: 4 },
+                'Mobilität & Verkehr': { bills: 7, questions: 14, motions: 5 },
+                'Gesundheit': { bills: 8, questions: 16, motions: 6 },
+                'Digitalisierung': { bills: 6, questions: 12, motions: 4 },
+            }
+        };
+
+        // Map user concerns → topics
+        const CONCERN_TO_TOPIC = {
+            'Kaufkraftverlust durch Inflation': ['Wirtschaft & Arbeit', 'Soziales'],
+            'Arbeitslosigkeit & Jobsicherheit': ['Wirtschaft & Arbeit'],
+            'Wohnungsknappheit & steigende Mieten': ['Wohnen & Mieten'],
+            'Straßensicherheit & öffentliche Ordnung': ['Innere Sicherheit'],
+            'Bildung & Schulqualität': ['Bildung'],
+            'Klimawandel & Umweltschutz': ['Klimaschutz', 'Energie'],
+            'Miete & Wohnkosten': ['Wohnen & Mieten'],
+            'Lebensmittel & Grundbedarf': ['Soziales', 'Wirtschaft & Arbeit'],
+            'Gesundheit & Medikamente': ['Gesundheit'],
+            'Energie & Heizkosten': ['Energie'],
+            'Mobilität & Verkehr': ['Mobilität & Verkehr'],
+            'Kinderbetreuung & Bildungskosten': ['Bildung', 'Soziales'],
+            'Mietpreisbremse & Wohnungsbauprogramm': ['Wohnen & Mieten'],
+            'Stärkung der Zentralbank-Unabhängigkeit': ['Wirtschaft & Arbeit'],
+            'Verlängerung des Arbeitslosengeldes': ['Soziales', 'Wirtschaft & Arbeit'],
+            'Mehr Polizei & Sicherheitsmaßnahmen': ['Innere Sicherheit'],
+            'Klimaschutzgesetz NRW': ['Klimaschutz', 'Energie'],
+            'Schulreform & mehr Lehrkräfte': ['Bildung'],
+        };
+
+        function getAllSelectedConcerns() {
+            return [...new Set([...state.selectedConcerns, ...state.selectedFinancial, ...state.selectedPolicy])];
+        }
+
+        function getActiveConcerns() {
+            const all = getAllSelectedConcerns();
+            if (!all.length) return [];
+            const active = all.filter(c => state.activeConcernFilters.has(c));
+            return active.length || state.activeConcernFilters.size === 0 ? active : all;
+        }
+
+        function getUserTopics(useActive = true) {
+            const source = useActive ? getActiveConcerns() : getAllSelectedConcerns();
+            const topics = new Set();
+            source.forEach(c => { (CONCERN_TO_TOPIC[c] || []).forEach(t => topics.add(t)); });
+            return topics;
+        }
+
+        function toggleConcernDropdown() {
+            state.concernDropdownOpen = !state.concernDropdownOpen;
+            const el = document.getElementById('concern-dropdown');
+            if (el) el.classList.toggle('open', state.concernDropdownOpen);
+        }
+
+        function renderConcernDropdown() {
+            const all = getAllSelectedConcerns();
+            const active = getActiveConcerns();
+            const title = document.getElementById('concern-dropdown-title');
+            const subtitle = document.getElementById('concern-dropdown-subtitle');
+            const list = document.getElementById('user-concern-list');
+            if (!title || !subtitle || !list) return;
+
+            title.textContent = all.length ? `Anliegen (${active.length}/${all.length})` : 'Keine Anliegen gewählt';
+            subtitle.textContent = all.length ? 'Einzelne Anliegen an- und ausschalten' : 'Starte neu, um Anliegen zu wählen';
+            list.innerHTML = all.length ? all.map(c => `
+    <button type="button" class="concern-toggle ${state.activeConcernFilters.has(c) ? 'active' : ''}" onclick="toggleConcernFilter('${c.replace(/'/g, "&#39;")}')">
+      <span class="concern-toggle-switch"></span>
+      <span class="concern-toggle-text">${c}</span>
+    </button>
+  `).join('') : `<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-2) 0;">Noch keine ausgewählten Anliegen.</div>`;
+            document.getElementById('concern-dropdown')?.classList.toggle('open', state.concernDropdownOpen);
+        }
+
+        function toggleConcernFilter(concern) {
+            if (state.activeConcernFilters.has(concern)) state.activeConcernFilters.delete(concern);
+            else state.activeConcernFilters.add(concern);
+            updateDashboardMeta();
+            closeDetail();
+            initGraph();
+        }
+
+        function updateDashboardMeta() {
+            renderConcernDropdown();
+            const active = getActiveConcerns();
+            const summary = active.length ? `Gefiltert nach: ${active.slice(0, 2).join(', ')}${active.length > 2 ? ` +${active.length - 2}` : ''}` : 'Keine Anliegen aktiv';
+            const header = document.getElementById('header-concern-summary');
+            if (header) header.textContent = summary;
+            updateMatchKpi();
+        }
+
+        function updateMatchKpi() {
+            const userTopics = getUserTopics(true);
+            let matches = 0;
+            PARTIES.forEach(p => {
+                userTopics.forEach(t => {
+                    if (ACTIVITIES_MOCK[p] && ACTIVITIES_MOCK[p][t]) {
+                        const d = ACTIVITIES_MOCK[p][t];
+                        matches += d.bills + d.questions + d.motions;
+                    }
+                });
+            });
+            const el = document.getElementById('kpi-matches');
+            if (el) el.textContent = matches.toLocaleString('de-DE');
+        }
+
+        // === SAMPLE ACTIVITIES (for detail panel) ===
+        const SAMPLE_ACTIVITIES = {
+            'SPD': {
+                'Wohnen & Mieten': [
+                    { title: 'Antrag: Landeswohnungsbaugesellschaft stärken', type: 'Antrag', date: 'Mrz 2024' },
+                    { title: 'Anfrage: Mietpreisanstieg in Essen 2023', type: 'Anfrage', date: 'Jan 2024' },
+                    { title: 'Gesetzesentwurf: Mietpreisbremse NRW', type: 'Gesetz', date: 'Okt 2023' },
+                ],
+                'Soziales': [
+                    { title: 'Antrag: Erhöhung des Wohngelds', type: 'Antrag', date: 'Feb 2024' },
+                    { title: 'Anfrage: Obdachlosigkeit in NRW', type: 'Anfrage', date: 'Dez 2023' },
+                ]
+            },
+            'CDU': {
+                'Wirtschaft & Arbeit': [
+                    { title: 'Gesetzesentwurf: Bürokratieabbau für KMUs', type: 'Gesetz', date: 'Apr 2024' },
+                    { title: 'Antrag: Fachkräftemangel im Mittelstand', type: 'Antrag', date: 'Feb 2024' },
+                ],
+                'Innere Sicherheit': [
+                    { title: 'Antrag: Aufstockung Polizei NRW', type: 'Antrag', date: 'Mrz 2024' },
+                    { title: 'Anfrage: Kriminalstatistik Ruhrgebiet', type: 'Anfrage', date: 'Jan 2024' },
+                ]
+            },
+            'GRÜNE': {
+                'Klimaschutz': [
+                    { title: 'Gesetzesentwurf: NRW-Klimaschutzgesetz 2.0', type: 'Gesetz', date: 'Mai 2024' },
+                    { title: 'Antrag: Solarausbau auf Industriedächern', type: 'Antrag', date: 'Mrz 2024' },
+                ],
+                'Energie': [
+                    { title: 'Anfrage: Windkraftausbau im Sauerland', type: 'Anfrage', date: 'Feb 2024' },
+                ]
+            }
+        };
+
+        const DOCUMENT_LIBRARY = {
+            'doc-cdu-tariftreue': {
+                id: 'doc-cdu-tariftreue',
+                title: 'Tariftreuegesetz',
+                fullTitle: 'Entwurf eines Gesetzes zur Stärkung der Tarifautonomie durch die Sicherung von Tariftreue bei der Vergabe öffentlicher Aufträge des Bundes (Tariftreuegesetz)',
+                meta: 'Bundestag PDF · Drucksache 21/1941',
+                source: 'Bund',
+                url: 'https://dserver.bundestag.de/btd/21/019/2101941.pdf',
+                summary: 'Öffentliche Aufträge sollen nur an Firmen gehen, die Tariflöhne einhalten.',
+                impacts: [
+                    { icon: '👷', title: 'Wenn du dort arbeitest', text: 'Mehr Schutz bei Lohn und Arbeitsbedingungen.' },
+                    { icon: '🏢', title: 'Wenn du mitbietest', text: 'Mehr Regeln und etwas mehr Aufwand für Firmen.' }
+                ],
+                stances: {
+                    support: ['CDU/CSU', 'SPD', 'Grüne'],
+                    oppose: ['AfD'],
+                    neutral: ['Die Linke']
+                }
+            },
+            'doc-wirtschaft-fachkraefte': {
+                id: 'doc-wirtschaft-fachkraefte',
+                title: 'Fachkräftemangel NRW',
+                fullTitle: 'Bericht zum Fachkräftemangel in Nordrhein-Westfalen',
+                meta: 'Mock Bericht · 14 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Zeigt, wo in NRW besonders viele Fachkräfte fehlen.',
+                impacts: [
+                    { icon: '💼', title: 'Für Beschäftigte', text: 'Kann Jobs und Weiterbildung verbessern.' },
+                    { icon: '🏭', title: 'Für Unternehmen', text: 'Firmen müssen stärker in Personal investieren.' }
+                ],
+                stances: { support: ['CDU', 'FDP'], oppose: [], neutral: ['SPD', 'Grüne', 'AfD'] }
+            },
+            'doc-wirtschaft-mittelstand': {
+                id: 'doc-wirtschaft-mittelstand',
+                title: 'Mittelstand entlasten',
+                fullTitle: 'Entwurf eines Mittelstandsentlastungsgesetzes',
+                meta: 'Mock PDF · 11 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Soll Bürokratie für kleinere Firmen senken.',
+                impacts: [
+                    { icon: '🧑‍💼', title: 'Für Arbeitnehmer', text: 'Kann indirekt neue Jobs fördern.' },
+                    { icon: '📄', title: 'Für KMUs', text: 'Weniger Papierkram für KMUs.' }
+                ],
+                stances: { support: ['CDU', 'FDP'], oppose: [], neutral: ['SPD', 'Grüne', 'AfD'] }
+            },
+            'doc-wohnen-mietpreisbremse': {
+                id: 'doc-wohnen-mietpreisbremse',
+                title: 'Mietpreisbremse NRW',
+                fullTitle: 'Entwurf zur Stärkung des Mieterschutzes und zur Mietpreisbremse in NRW',
+                meta: 'Mock Dossier · 18 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Soll steigende Mieten bremsen.',
+                impacts: [
+                    { icon: '🏠', title: 'Für Mieter', text: 'Kann Wohnen planbarer machen.' },
+                    { icon: '🏗️', title: 'Für Vermieter / Bau', text: 'Mehr Regeln für Vermieter.' }
+                ],
+                stances: { support: ['SPD', 'Grüne'], oppose: ['FDP'], neutral: ['CDU', 'AfD'] }
+            },
+            'doc-soziales-wohngeld': {
+                id: 'doc-soziales-wohngeld',
+                title: 'Wohngeld & Sozialhilfe',
+                fullTitle: 'Kurzdossier zu Wohngeld, Unterstützung im Alltag und sozialer Absicherung',
+                meta: 'Mock Dossier · 8 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Zeigt Hilfen bei Wohnen und Grundsicherung.',
+                impacts: [
+                    { icon: '🧾', title: 'Für Haushalte', text: 'Kann Haushalte finanziell entlasten.' },
+                    { icon: '🏛️', title: 'Für den Staat', text: 'Kostet mehr, stärkt aber Absicherung.' }
+                ],
+                stances: { support: ['SPD', 'Grüne'], oppose: [], neutral: ['CDU', 'FDP', 'AfD'] }
+            },
+            'doc-bildung-schulqualitaet': {
+                id: 'doc-bildung-schulqualitaet',
+                title: 'Schulqualität NRW',
+                fullTitle: 'Ausschussbericht zur Schulqualität und Lehrkräfteversorgung',
+                meta: 'Mock Bericht · 10 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Zeigt Probleme bei Lehrkräften und Unterricht.',
+                impacts: [
+                    { icon: '🎓', title: 'Für Familien', text: 'Kann Schule verlässlicher machen.' },
+                    { icon: '🏫', title: 'Für Schulen', text: 'Mehr Reformen und mehr Personalbedarf.' }
+                ],
+                stances: { support: ['CDU', 'SPD', 'Grüne'], oppose: [], neutral: ['FDP', 'AfD'] }
+            },
+            'doc-klima-klimaschutz': {
+                id: 'doc-klima-klimaschutz',
+                title: 'Klimaschutzgesetz NRW',
+                fullTitle: 'Entwurf zur Fortschreibung des Klimaschutzgesetzes Nordrhein-Westfalen',
+                meta: 'Mock PDF · 21 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Setzt klarere Ziele für Emissionen und Energie.',
+                impacts: [
+                    { icon: '🌍', title: 'Für Bürger', text: 'Mehr Klimaschutz, aber auch Veränderungen im Alltag.' },
+                    { icon: '⚙️', title: 'Für Wirtschaft', text: 'Firmen müssen sich anpassen.' }
+                ],
+                stances: { support: ['Grüne', 'SPD'], oppose: ['AfD'], neutral: ['CDU', 'FDP'] }
+            },
+            'doc-sicherheit-lagebericht': {
+                id: 'doc-sicherheit-lagebericht',
+                title: 'Sicherheitslage Ruhrgebiet',
+                fullTitle: 'Sicherheitslagebericht Ruhrgebiet mit Schwerpunkt öffentliche Ordnung',
+                meta: 'Mock Bericht · 17 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Zeigt, wie sich Sicherheit und Polizeiarbeit entwickeln.',
+                impacts: [
+                    { icon: '🚓', title: 'Für Anwohner', text: 'Kann mehr Polizeipräsenz bringen.' },
+                    { icon: '💶', title: 'Für den Haushalt', text: 'Kostet mehr Geld für Personal und Ausrüstung.' }
+                ],
+                stances: { support: ['CDU', 'AfD'], oppose: [], neutral: ['SPD', 'Grüne', 'FDP'] }
+            },
+            'doc-gesundheit-krankenhaus': {
+                id: 'doc-gesundheit-krankenhaus',
+                title: 'Krankenhausversorgung NRW',
+                fullTitle: 'Bericht zur Krankenhausversorgung und regionalen Erreichbarkeit in NRW',
+                meta: 'Mock Bericht · 19 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Zeigt Probleme bei Kliniken und Versorgung.',
+                impacts: [
+                    { icon: '🩺', title: 'Für Patienten', text: 'Kann Versorgung vor Ort verbessern.' },
+                    { icon: '🏥', title: 'Für Kliniken', text: 'Bringt Reformdruck für Kliniken.' }
+                ],
+                stances: { support: ['SPD', 'CDU'], oppose: [], neutral: ['Grüne', 'FDP', 'AfD'] }
+            },
+            'doc-energie-netze': {
+                id: 'doc-energie-netze',
+                title: 'Energiepreise & Netze',
+                fullTitle: 'Papier zu Energiepreisen, Netzausbau und Versorgungssicherheit',
+                meta: 'Mock PDF · 12 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Zeigt, was gegen hohe Energiepreise helfen könnte.',
+                impacts: [
+                    { icon: '🔥', title: 'Für Haushalte', text: 'Kann Preise langfristig stabilisieren.' },
+                    { icon: '🏭', title: 'Für Unternehmen', text: 'Firmen müssen stärker in Effizienz investieren.' }
+                ],
+                stances: { support: ['CDU', 'Grüne'], oppose: [], neutral: ['SPD', 'FDP', 'AfD'] }
+            },
+            'doc-verkehr-oepnv': {
+                id: 'doc-verkehr-oepnv',
+                title: 'ÖPNV-Ausbau',
+                fullTitle: 'Strategiepapier zum Ausbau des öffentlichen Nahverkehrs in NRW',
+                meta: 'Mock Strategie · 15 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Soll Bus und Bahn zuverlässiger machen.',
+                impacts: [
+                    { icon: '🚌', title: 'Für Pendler', text: 'Kann Pendeln leichter machen.' },
+                    { icon: '🏗️', title: 'Für Kommunen', text: 'Kommunen müssen mehr investieren.' }
+                ],
+                stances: { support: ['Grüne', 'SPD'], oppose: [], neutral: ['CDU', 'FDP', 'AfD'] }
+            },
+            'doc-digital-verwaltung': {
+                id: 'doc-digital-verwaltung',
+                title: 'Digitale Verwaltung NRW',
+                fullTitle: 'Strategie zur Digitalisierung der Verwaltung in Nordrhein-Westfalen',
+                meta: 'Mock Strategie · 20 Seiten',
+                source: 'NRW',
+                url: '',
+                summary: 'Soll Behörden digitaler und schneller machen.',
+                impacts: [
+                    { icon: '📱', title: 'Für Bürger', text: 'Weniger Papierkram für Bürger.' },
+                    { icon: '🖥️', title: 'Für Verwaltung', text: 'Mehr Umstellung in der Verwaltung.' }
+                ],
+                stances: { support: ['FDP', 'CDU', 'SPD'], oppose: [], neutral: ['Grüne', 'AfD'] }
+            }
+        };
+
+        const TOPIC_DOCUMENT_IDS = {
+            'Wirtschaft & Arbeit': ['doc-wirtschaft-fachkraefte', 'doc-wirtschaft-mittelstand'],
+            'Wohnen & Mieten': ['doc-wohnen-mietpreisbremse'],
+            'Soziales': ['doc-soziales-wohngeld'],
+            'Bildung': ['doc-bildung-schulqualitaet'],
+            'Klimaschutz': ['doc-klima-klimaschutz'],
+            'Innere Sicherheit': ['doc-sicherheit-lagebericht'],
+            'Gesundheit': ['doc-gesundheit-krankenhaus'],
+            'Energie': ['doc-energie-netze'],
+            'Mobilität & Verkehr': ['doc-verkehr-oepnv'],
+            'Digitalisierung': ['doc-digital-verwaltung']
+        };
+
+        function getDocumentsForNode(d) {
+            if (d.type === 'party') {
+                const allData = ACTIVITIES_MOCK[d.party] || {};
+                const allTopics = Object.entries(allData)
+                    .sort((a, b) => (b[1].bills + b[1].questions + b[1].motions) - (a[1].bills + a[1].questions + a[1].motions))
+                    .slice(0, 2)
+                    .map(([topic]) => topic);
+                const ids = allTopics.flatMap(topic => TOPIC_DOCUMENT_IDS[topic] || []).slice(0, 3);
+                return ids.map(id => DOCUMENT_LIBRARY[id]).filter(Boolean);
+            }
+            const ids = [...(TOPIC_DOCUMENT_IDS[d.topic] || [])];
+            if (d.party === 'CDU' && d.topic === 'Wirtschaft & Arbeit') ids.unshift('doc-cdu-tariftreue');
+            return [...new Set(ids)].map(id => DOCUMENT_LIBRARY[id]).filter(Boolean);
+        }
+
+        function renderPaperLinks(items) {
+            if (!items.length) return '';
+            return `
+    <div class="detail-activities-title">Zugehörige Unterlagen</div>
+    <div class="paper-link-list">
+      ${items.map((paper) => `
+        <button type="button" class="paper-link" onclick="openDocModal('${paper.id}')" aria-label="Dokument öffnen: ${paper.title}">
+          <span class="paper-link-left">
+            <span class="paper-link-title">${paper.title}</span>
+          </span>
+          <span class="paper-link-meta">${paper.meta}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+        }
+
+        // === D3 GRAPH ===
+        let svg, simulation, zoomBehavior, gMain;
+
+        function buildDashboard() {
+            const allConcerns = getAllSelectedConcerns();
+            state.activeConcernFilters = new Set(allConcerns);
+            state.concernDropdownOpen = false;
+            updateDashboardMeta();
+            goTo('screen-dashboard');
+            setTimeout(() => initGraph(), 150);
+        }
+
+        function initGraph() {
+            const container = document.getElementById('graph-container');
+            const W = container.clientWidth;
+            const H = container.clientHeight || 520;
+
+            d3.select('#graph-svg').selectAll('*').remove();
+            svg = d3.select('#graph-svg').attr('width', W).attr('height', H);
+
+            // Defs: arrow marker
+            const defs = svg.append('defs');
+            defs.append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 -4 8 8').attr('refX', 16).attr('refY', 0)
+                .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+                .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', 'var(--color-border)');
+
+            gMain = svg.append('g').attr('class', 'g-main');
+            zoomBehavior = d3.zoom().scaleExtent([0.3, 3])
+                .on('zoom', e => gMain.attr('transform', e.transform));
+            svg.call(zoomBehavior);
+
+            buildGraph(W, H);
+        }
+
+        function buildGraph(W, H) {
+            const userTopics = getUserTopics(true);
+            const activeParties = [...state.activeParties];
+            const nodes = [];
+            const links = [];
+            const topicRadius = 28;
+
+            const relevantTotals = Object.fromEntries(activeParties.map(party => {
+                const relevant = [...userTopics].reduce((sum, topic) => {
+                    const d = ACTIVITIES_MOCK[party] && ACTIVITIES_MOCK[party][topic];
+                    return sum + (d ? d.bills + d.questions + d.motions : 0);
+                }, 0);
+                return [party, relevant];
+            }));
+
+            const relevantValues = Object.values(relevantTotals).filter(v => v > 0);
+            const minRelevant = relevantValues.length ? Math.min(...relevantValues) : 0;
+            const maxRelevant = relevantValues.length ? Math.max(...relevantValues) : 1;
+            const partyRadiusFor = (party) => {
+                const val = relevantTotals[party] || 0;
+                if (!userTopics.size || maxRelevant === minRelevant) return val > 0 ? 38 : 34;
+                if (val <= 0) return 30;
+                return 32 + ((val - minRelevant) / (maxRelevant - minRelevant || 1)) * 18;
+            };
+
+            nodes.push({ id: 'hub', type: 'hub', label: 'NRW Landtag', r: 30 });
+
+            activeParties.forEach(party => {
+                nodes.push({ id: party, type: 'party', label: party, party, r: partyRadiusFor(party), relevantTotal: relevantTotals[party] || 0 });
+                links.push({ source: 'hub', target: party, strength: 0.28, isRelevant: (relevantTotals[party] || 0) > 0 });
+
+                TOPICS.forEach(topic => {
+                    const d = ACTIVITIES_MOCK[party] && ACTIVITIES_MOCK[party][topic];
+                    if (!d) return;
+                    const nodeId = `${party}-${topic}`;
+                    const total = d.bills + d.questions + d.motions;
+                    const isUserConcern = userTopics.has(topic);
+                    nodes.push({ id: nodeId, type: 'topic', label: topic, party, topic, total, isUserConcern, r: topicRadius });
+                    links.push({ source: party, target: nodeId, value: total, isRelevant: isUserConcern });
+                });
+            });
+
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(d => d.source.type === 'hub' ? 115 : 96).strength(d => d.source.type === 'hub' ? 0.35 : 0.5))
+                .force('charge', d3.forceManyBody().strength(-240))
+                .force('center', d3.forceCenter(W / 2, H / 2))
+                .force('collision', d3.forceCollide().radius(d => d.r + 12));
+
+            const link = gMain.append('g').selectAll('line')
+                .data(links).join('line')
+                .attr('stroke', d => d.isRelevant ? 'var(--color-accent)' : 'var(--color-border)')
+                .attr('stroke-opacity', d => d.isRelevant ? 0.28 : 0.16)
+                .attr('stroke-width', d => d.source.type === 'hub' ? 1.8 : 1.2)
+                .attr('marker-end', 'url(#arrow)');
+
+            const node = gMain.append('g').selectAll('g')
+                .data(nodes).join('g')
+                .attr('class', d => `node ${d.type === 'topic' && userTopics.size && !d.isUserConcern ? 'node-muted' : ''}`)
+                .call(d3.drag()
+                    .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+                    .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+                    .on('end', (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }))
+                .on('click', (e, d) => { e.stopPropagation(); showDetail(d); })
+                .on('mouseover', (e, d) => showTooltip(e, d))
+                .on('mousemove', moveTooltip)
+                .on('mouseout', hideTooltip)
+                .style('cursor', 'pointer');
+
+            node.append('circle')
+                .attr('r', d => d.r)
+                .attr('fill', d => {
+                    if (d.type === 'hub') return 'var(--color-primary)';
+                    if (d.type === 'party') return PARTY_COLORS[d.party] || '#888';
+                    if (userTopics.size && !d.isUserConcern) return 'rgba(165,165,165,0.08)';
+                    return `${PARTY_COLORS[d.party] || '#888'}26`;
+                })
+                .attr('stroke', d => {
+                    if (d.type === 'hub') return 'var(--color-primary-hover)';
+                    if (d.type === 'party') return d.relevantTotal > 0 ? 'var(--color-accent)' : (PARTY_COLORS[d.party] || '#888');
+                    if (d.isUserConcern) return 'var(--color-accent)';
+                    return '#a8a8a8';
+                })
+                .attr('stroke-width', d => d.type === 'party' && d.relevantTotal > 0 ? 2.5 : (d.isUserConcern ? 2.5 : 1.6))
+                .style('filter', d => (d.isUserConcern || (d.type === 'party' && d.relevantTotal > 0)) ? 'drop-shadow(0 0 8px var(--color-accent))' : 'none');
+
+            const topicLabelLines = {
+                'Wohnen & Mieten': ['Wohnen', '& Mieten'],
+                'Wirtschaft & Arbeit': ['Wirtschaft', '& Arbeit'],
+                'Mobilität & Verkehr': ['Mobilität', '& Verkehr'],
+                'Innere Sicherheit': ['Innere', 'Sicherheit'],
+                'Klimaschutz': ['Klima', 'schutz'],
+                'Digitalisierung': ['Digitali', 'sierung'],
+                'Gesundheit': ['Gesund', 'heit']
+            };
+
+            node.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
+                .attr('fill', d => {
+                    if (d.type === 'hub' || d.type === 'party') return '#fff';
+                    if (userTopics.size && !d.isUserConcern) return '#9d9d9d';
+                    return d.isUserConcern ? 'var(--color-text)' : PARTY_COLORS[d.party] || '#888';
+                })
+                .attr('font-size', d => d.type === 'topic' ? '7px' : '10px')
+                .attr('font-family', 'var(--font-body)')
+                .attr('font-weight', d => d.isUserConcern ? '600' : '500')
+                .attr('pointer-events', 'none')
+                .each(function (d) {
+                    const el = d3.select(this);
+                    if (d.type === 'hub') {
+                        el.append('tspan').attr('x', 0).attr('dy', '-0.35em').text('NRW');
+                        el.append('tspan').attr('x', 0).attr('dy', '1.1em').text('Landtag');
+                    } else if (d.type === 'party') {
+                        el.text(d.label);
+                    } else {
+                        const lines = topicLabelLines[d.label] || d.label.split(' ');
+                        const startDy = lines.length === 1 ? '0.1em' : (lines.length === 2 ? '-0.3em' : '-0.75em');
+                        lines.slice(0, 3).forEach((line, idx) => {
+                            el.append('tspan').attr('x', 0).attr('dy', idx === 0 ? startDy : '1.05em').text(line);
+                        });
+                    }
+                });
+
+            simulation.on('tick', () => {
+                link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            svg.on('click', () => closeDetail());
+        }
+
+        function updateGraph() {
+            const container = document.getElementById('graph-container');
+            initGraph();
+        }
+
+        // === TOOLTIP ===
+        const tooltip = document.getElementById('node-tooltip');
+        function showTooltip(e, d) {
+            if (d.type === 'hub') return;
+            document.getElementById('tt-party').textContent = d.type === 'party' ? d.party : d.party + ' · ' + d.topic;
+            document.getElementById('tt-topic').textContent = d.type === 'party' ? 'Arbeit zu deinen aktiven Anliegen' : '';
+            const total = d.type === 'party' ? (d.relevantTotal || 0) : (d.total || Object.values(ACTIVITIES_MOCK[d.party] || {}).reduce((s, v) => s + (v.bills + v.questions + v.motions), 0));
+            document.getElementById('tt-count').textContent = total.toLocaleString('de-DE');
+            tooltip.classList.add('visible');
+            moveTooltip(e);
+        }
+        function moveTooltip(e) {
+            const rect = document.getElementById('graph-container').getBoundingClientRect();
+            let x = e.clientX - rect.left + 12;
+            let y = e.clientY - rect.top + 12;
+            if (x + 250 > rect.width) x -= 260;
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }
+        function hideTooltip() { tooltip.classList.remove('visible'); }
+
+        // === DETAIL PANEL ===
+        function showDetail(d) {
+            if (d.type === 'hub') return;
+            const panel = document.getElementById('detail-panel');
+            const title = document.getElementById('detail-title');
+            const stats = document.getElementById('detail-stats');
+            const papers = document.getElementById('detail-papers');
+            const activities = document.getElementById('detail-activities');
+
+            if (d.type === 'party') {
+                title.textContent = d.party;
+                const allData = ACTIVITIES_MOCK[d.party] || {};
+                const totals = Object.values(allData).reduce((acc, v) => ({
+                    bills: acc.bills + v.bills,
+                    questions: acc.questions + v.questions,
+                    motions: acc.motions + v.motions
+                }), { bills: 0, questions: 0, motions: 0 });
+
+                stats.innerHTML = `
+      <div class="detail-stat"><span class="detail-stat-label">Gesetzesentwürfe</span><span class="detail-stat-value">${totals.bills}</span></div>
+      <div class="detail-stat"><span class="detail-stat-label">Anfragen</span><span class="detail-stat-value">${totals.questions}</span></div>
+      <div class="detail-stat"><span class="detail-stat-label">Anträge</span><span class="detail-stat-value">${totals.motions}</span></div>
+      <div class="detail-stat"><span class="detail-stat-label">Gesamt</span><span class="detail-stat-value" style="color:var(--color-primary)">${totals.bills + totals.questions + totals.motions}</span></div>
+      <div class="detail-stat"><span class="detail-stat-label">Arbeit zu deinen Anliegen</span><span class="detail-stat-value" style="color:var(--color-accent)">${d.relevantTotal || 0}</span></div>
+    `;
+
+                const topTopics = Object.entries(allData).sort((a, b) => (b[1].bills + b[1].questions + b[1].motions) - (a[1].bills + a[1].questions + a[1].motions)).slice(0, 3);
+                papers.innerHTML = renderPaperLinks(getDocumentsForNode(d));
+                activities.innerHTML = `
+      <div class="detail-activities-title">Top Themengebiete</div>
+      ${topTopics.map(([t, v]) => `
+        <div class="activity-row">
+          <div class="activity-row-title">${t}</div>
+          <div class="activity-row-meta">
+            <span>${v.bills} Gesetze</span> · <span>${v.questions} Anfragen</span>
+          </div>
+        </div>
+      `).join('')}
+    `;
+            } else {
+                title.textContent = `${d.party}: ${d.topic}`;
+                const v = ACTIVITIES_MOCK[d.party][d.topic];
+                stats.innerHTML = `
+      <div class="detail-stat"><span class="detail-stat-label">Gesetzesentwürfe</span><span class="detail-stat-value">${v.bills}</span></div>
+      <div class="detail-stat"><span class="detail-stat-label">Anfragen</span><span class="detail-stat-value">${v.questions}</span></div>
+      <div class="detail-stat"><span class="detail-stat-label">Anträge</span><span class="detail-stat-value">${v.motions}</span></div>
+      ${d.isUserConcern ? '<div class="detail-stat" style="border-color:var(--color-accent)"><span class="detail-stat-label" style="color:var(--color-accent)">✓ Dein Anliegen</span><span class="detail-stat-value" style="color:var(--color-accent)">Relevant</span></div>' : ''}
+    `;
+
+                papers.innerHTML = renderPaperLinks(getDocumentsForNode(d));
+                const sampleActs = (SAMPLE_ACTIVITIES[d.party] && SAMPLE_ACTIVITIES[d.party][d.topic]) || [];
+                activities.innerHTML = sampleActs.length ? `
+      <div class="detail-activities-title">Beispiel-Aktivitäten</div>
+      ${sampleActs.map(a => `
+        <div class="activity-row">
+          <div class="activity-row-title">${a.title}</div>
+          <div class="activity-row-meta">
+            <span class="activity-badge">${a.type}</span>
+            <span>${a.date}</span>
+          </div>
+        </div>
+      `).join('')}
+    ` : '';
+            }
+
+            panel.classList.add('open');
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-panel').classList.remove('open');
+        }
+
+
+        function openDocModal(docId) {
+            const doc = DOCUMENT_LIBRARY[docId];
+            if (!doc) return;
+            document.getElementById('doc-source-badge').textContent = doc.source === 'Bund' ? 'Bundestag / Bund' : (doc.source || 'Quelle');
+            document.getElementById('doc-modal-title').textContent = doc.title;
+            document.getElementById('doc-full-title').textContent = doc.fullTitle || doc.title;
+            const link = document.getElementById('doc-modal-link');
+            link.href = doc.url || '#';
+            link.style.display = doc.url ? 'inline-flex' : 'none';
+            document.getElementById('doc-meta').textContent = doc.meta || '';
+            document.getElementById('doc-summary').textContent = doc.summary || '';
+            document.getElementById('doc-impacts').innerHTML = (doc.impacts || []).map(item => `
+    <div class="impact-card">
+      <div class="impact-card-head"><span>${item.icon || '•'}</span><span>${item.title}</span></div>
+      <p>${item.text}</p>
+    </div>
+  `).join('');
+            const fillChips = (id, arr, cls) => {
+                document.getElementById(id).innerHTML = (arr && arr.length) ? arr.map(v => `<span class="stance-chip ${cls}">${v}</span>`).join('') : `<span class="stance-chip neutral">—</span>`;
+            };
+            fillChips('doc-support', doc.stances?.support || [], 'support');
+            fillChips('doc-oppose', doc.stances?.oppose || [], 'oppose');
+            fillChips('doc-neutral', doc.stances?.neutral || [], 'neutral');
+            const modal = document.getElementById('doc-modal');
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeDocModal() {
+            const modal = document.getElementById('doc-modal');
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        // === ZOOM CONTROLS ===
+        function zoomIn() { svg.transition().duration(300).call(zoomBehavior.scaleBy, 1.4); }
+        function zoomOut() { svg.transition().duration(300).call(zoomBehavior.scaleBy, 0.7); }
+        function resetZoom() { svg.transition().duration(400).call(zoomBehavior.transform, d3.zoomIdentity); }
+
+        // Handle resize
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDocModal(); });
+
+        window.addEventListener('resize', () => {
+            if (state.currentScreen === 'screen-dashboard') {
+                clearTimeout(window._resizeTimer);
+                window._resizeTimer = setTimeout(() => initGraph(), 200);
+            }
+        });
+    </script>
+</body>
+
+</html>
